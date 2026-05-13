@@ -1,0 +1,1226 @@
+openapi: 3.0.3
+info:
+  title: Edu Mall Admin API
+  version: 1.0.0
+  description: |
+    管理后台接口文档。所有接口路径均以 /api/mall 为全局前缀。
+    除鉴权失败可能返回 HTTP 401 外，业务接口统一返回 Resp 包装结构。
+servers:
+  - url: /api/mall
+security:
+  - TokenAuth: []
+tags:
+  - name: AdminAuth
+    description: 管理员登录、验证码、飞书扫码
+  - name: AdminCustomer
+    description: C 端用户管理
+  - name: AdminUser
+    description: 管理员用户管理
+  - name: AdminPerm
+    description: 权限菜单管理
+  - name: AdminRole
+    description: 角色管理
+  - name: AdminStorage
+    description: 对象存储临时密钥
+  - name: AdminLesson
+    description: 录播课时与分类管理
+  - name: AdminCourse
+    description: 课程与目录管理
+  - name: AdminOrder
+    description: 订单、退款与统计
+paths:
+  /admin/v1/user/verify/captcha:
+    get:
+      tags: [AdminAuth]
+      summary: 获取滑块验证码
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/once'
+        - $ref: '#/components/parameters/ts'
+        - $ref: '#/components/parameters/sign'
+      responses:
+        '200': { $ref: '#/components/responses/GetVerifyCaptchaResp' }
+  /admin/v1/user/verify/captcha/check:
+    post:
+      tags: [AdminAuth]
+      summary: 校验滑块验证码
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/CheckCaptchaReq' }
+      responses:
+        '200': { $ref: '#/components/responses/CheckCaptchaResp' }
+  /admin/v1/user/verify/smscode:
+    post:
+      tags: [AdminAuth]
+      summary: 发送短信验证码
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/GetSmsVerifyCodeReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/user/mobile/password_login:
+    post:
+      tags: [AdminAuth]
+      summary: 管理员手机号密码登录
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/MobilePasswordLoginReq' }
+      responses:
+        '200': { $ref: '#/components/responses/AdminLoginResp' }
+  /admin/v1/user/mobile/verify_login:
+    post:
+      tags: [AdminAuth]
+      summary: 管理员手机号验证码登录
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/MobileVerifyCodeLoginReq' }
+      responses:
+        '200': { $ref: '#/components/responses/AdminLoginResp' }
+  /admin/v1/user/lark/qrcode_login:
+    post:
+      tags: [AdminAuth]
+      summary: 飞书扫码登录
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/LarkQrCodeLoginReq' }
+      responses:
+        '200': { $ref: '#/components/responses/AdminLoginResp' }
+  /admin/v1/user/mobile/reset_password:
+    post:
+      tags: [AdminAuth]
+      summary: 手机号重置密码
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/MobilePasswordResetReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/customer/user/list:
+    get:
+      tags: [AdminCustomer]
+      summary: C 端用户列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+        - { name: id, in: query, schema: { type: integer, format: int64 }, description: 用户 ID }
+        - { name: nick_name_kw, in: query, schema: { type: string }, description: 昵称关键词 }
+        - { name: status, in: query, schema: { type: integer, format: int32 }, description: 用户状态 }
+        - { name: mobile, in: query, schema: { type: string }, description: 手机号 }
+      responses:
+        '200': { $ref: '#/components/responses/ListCustomerUserResp' }
+  /admin/v1/customer/user/info:
+    get:
+      tags: [AdminCustomer]
+      summary: C 端用户详情
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: integer, format: int64 }, description: 用户 ID }
+      responses:
+        '200': { $ref: '#/components/responses/CustomerUserInfoResp' }
+  /admin/v1/user/logout:
+    post:
+      tags: [AdminUser]
+      summary: 管理员登出
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/user/list:
+    get:
+      tags: [AdminUser]
+      summary: 管理员用户列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+        - { name: name_kw, in: query, schema: { type: string }, description: 用户名关键词 }
+        - { name: mobile, in: query, schema: { type: string }, description: 手机号 }
+        - { name: role_id, in: query, schema: { type: integer, format: int64 }, description: 角色 ID }
+        - { name: status, in: query, schema: { type: integer, format: int32 }, description: 状态 }
+      responses:
+        '200': { $ref: '#/components/responses/ListAdminUserResp' }
+  /admin/v1/user/info:
+    get:
+      tags: [AdminUser]
+      summary: 当前管理员信息
+      responses:
+        '200': { $ref: '#/components/responses/AdminUserWithRoleResp' }
+  /admin/v1/user/create:
+    post:
+      tags: [AdminUser]
+      summary: 创建管理员用户
+      requestBody: { $ref: '#/components/requestBodies/CreateUserReq' }
+      responses:
+        '200': { $ref: '#/components/responses/IdResp' }
+  /admin/v1/user/update:
+    post:
+      tags: [AdminUser]
+      summary: 更新管理员用户
+      requestBody: { $ref: '#/components/requestBodies/UpdateUserReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/user/delete:
+    post:
+      tags: [AdminUser]
+      summary: 删除管理员用户
+      requestBody: { $ref: '#/components/requestBodies/DeleteUserReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/user/lark_bind:
+    post:
+      tags: [AdminUser]
+      summary: 绑定飞书账号
+      requestBody: { $ref: '#/components/requestBodies/LarkQrCodeBindReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/user/lark_unbind:
+    post:
+      tags: [AdminUser]
+      summary: 解绑飞书账号
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/perm/create:
+    post:
+      tags: [AdminPerm]
+      summary: 创建权限/菜单
+      requestBody: { $ref: '#/components/requestBodies/AddPermissionReq' }
+      responses:
+        '200': { $ref: '#/components/responses/IdResp' }
+  /admin/v1/perm/update:
+    post:
+      tags: [AdminPerm]
+      summary: 批量更新权限/菜单
+      requestBody: { $ref: '#/components/requestBodies/UpdatePermissionReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/perm/delete:
+    post:
+      tags: [AdminPerm]
+      summary: 删除权限/菜单
+      requestBody: { $ref: '#/components/requestBodies/DeletePermissionReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/perm/list:
+    get:
+      tags: [AdminPerm]
+      summary: 权限菜单列表
+      responses:
+        '200': { $ref: '#/components/responses/PermissionListResp' }
+  /admin/v1/perm/my_perms:
+    get:
+      tags: [AdminPerm]
+      summary: 当前管理员权限列表
+      responses:
+        '200': { $ref: '#/components/responses/MyPermissionListResp' }
+  /admin/v1/role/create:
+    post:
+      tags: [AdminRole]
+      summary: 创建角色
+      requestBody: { $ref: '#/components/requestBodies/AddRoleReq' }
+      responses:
+        '200': { $ref: '#/components/responses/IdResp' }
+  /admin/v1/role/update:
+    post:
+      tags: [AdminRole]
+      summary: 更新角色
+      requestBody: { $ref: '#/components/requestBodies/UpdateRoleReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/role/list:
+    get:
+      tags: [AdminRole]
+      summary: 角色列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+        - { name: name_kw, in: query, schema: { type: string }, description: 角色名称关键词 }
+        - { name: status, in: query, schema: { type: integer, format: int32 }, description: 角色状态 }
+      responses:
+        '200': { $ref: '#/components/responses/ListRoleResp' }
+  /admin/v1/role/my_roles:
+    get:
+      tags: [AdminRole]
+      summary: 当前管理员角色列表
+      responses:
+        '200': { $ref: '#/components/responses/MyRolesResp' }
+  /admin/v1/role/perm/sets:
+    post:
+      tags: [AdminRole]
+      summary: 设置角色权限
+      requestBody: { $ref: '#/components/requestBodies/SetRolePermReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/storage/get_temp_secret:
+    post:
+      tags: [AdminStorage]
+      summary: 获取对象存储临时密钥
+      requestBody: { $ref: '#/components/requestBodies/GetTempSecretReq' }
+      responses:
+        '200': { $ref: '#/components/responses/TempSecretResp' }
+  /admin/v1/lesson/category/create:
+    post:
+      tags: [AdminLesson]
+      summary: 创建课时分类
+      requestBody: { $ref: '#/components/requestBodies/AddCategoryReq' }
+      responses:
+        '200': { $ref: '#/components/responses/Int64Resp' }
+  /admin/v1/lesson/category/update:
+    post:
+      tags: [AdminLesson]
+      summary: 更新课时分类
+      requestBody: { $ref: '#/components/requestBodies/UpdateCategoryReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/lesson/category/delete:
+    post:
+      tags: [AdminLesson]
+      summary: 删除课时分类
+      requestBody: { $ref: '#/components/requestBodies/DeleteCategoryReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/lesson/category/list:
+    get:
+      tags: [AdminLesson]
+      summary: 课时分类列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+      responses:
+        '200': { $ref: '#/components/responses/CategoryListResp' }
+  /admin/v1/lesson/category/update_sort:
+    post:
+      tags: [AdminLesson]
+      summary: 更新课时分类排序
+      requestBody: { $ref: '#/components/requestBodies/UpdateSortListReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/lesson/create:
+    post:
+      tags: [AdminLesson]
+      summary: 创建课时
+      requestBody: { $ref: '#/components/requestBodies/CreateLessonReq' }
+      responses:
+        '200': { $ref: '#/components/responses/IdResp' }
+  /admin/v1/lesson/update:
+    post:
+      tags: [AdminLesson]
+      summary: 更新课时
+      requestBody: { $ref: '#/components/requestBodies/UpdateLessonReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/lesson/move:
+    post:
+      tags: [AdminLesson]
+      summary: 移动课时到分类
+      requestBody: { $ref: '#/components/requestBodies/MoveLessonReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/lesson/update_status:
+    post:
+      tags: [AdminLesson]
+      summary: 更新课时状态
+      requestBody: { $ref: '#/components/requestBodies/UpdateLessonStatusReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/lesson/list:
+    post:
+      tags: [AdminLesson]
+      summary: 课时列表
+      requestBody: { $ref: '#/components/requestBodies/ListLessonReq' }
+      responses:
+        '200': { $ref: '#/components/responses/ListLessonResp' }
+  /admin/v1/lesson/info:
+    get:
+      tags: [AdminLesson]
+      summary: 课时详情
+      parameters:
+        - { name: lesson_id, in: query, required: true, schema: { type: integer, format: int64 }, description: 课时 ID }
+        - { name: user_id, in: query, schema: { type: integer, format: int64 }, description: 用户 ID }
+      responses:
+        '200': { $ref: '#/components/responses/LessonResp' }
+  /admin/v1/course/create:
+    post:
+      tags: [AdminCourse]
+      summary: 创建课程
+      requestBody: { $ref: '#/components/requestBodies/CreateCourseReq' }
+      responses:
+        '200': { $ref: '#/components/responses/IdResp' }
+  /admin/v1/course/info:
+    get:
+      tags: [AdminCourse]
+      summary: 课程详情
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: integer, format: int64 }, description: 课程 ID }
+      responses:
+        '200': { $ref: '#/components/responses/CourseResp' }
+  /admin/v1/course/update:
+    post:
+      tags: [AdminCourse]
+      summary: 更新课程
+      requestBody: { $ref: '#/components/requestBodies/UpdateCourseReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/course/update_status:
+    post:
+      tags: [AdminCourse]
+      summary: 更新课程状态
+      requestBody: { $ref: '#/components/requestBodies/UpdateCourseStatusReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/course/list:
+    get:
+      tags: [AdminCourse]
+      summary: 课程列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+        - { name: user_id, in: query, schema: { type: integer, format: int64 }, description: 用户 ID，用于查询购买状态 }
+        - { name: id, in: query, schema: { type: integer, format: int64 }, description: 课程 ID }
+        - { name: name_kw, in: query, schema: { type: string }, description: 课程名称关键词 }
+        - { name: create_start_time, in: query, schema: { type: integer, format: int64 }, description: 创建开始时间 }
+        - { name: create_end_time, in: query, schema: { type: integer, format: int64 }, description: 创建结束时间 }
+        - { name: update_start_time, in: query, schema: { type: integer, format: int64 }, description: 更新开始时间 }
+        - { name: update_end_time, in: query, schema: { type: integer, format: int64 }, description: 更新结束时间 }
+        - { name: update_status, in: query, schema: { type: integer, format: int32 }, description: 更新状态 }
+        - { name: status, in: query, schema: { type: integer, format: int32 }, description: 课程状态 }
+        - { name: is_recommend, in: query, schema: { type: boolean }, description: 是否推荐 }
+      responses:
+        '200': { $ref: '#/components/responses/CourseListResp' }
+  /admin/v1/course/catalog/add:
+    post:
+      tags: [AdminCourse]
+      summary: 添加课程目录
+      requestBody: { $ref: '#/components/requestBodies/AddCatalogReq' }
+      responses:
+        '200': { $ref: '#/components/responses/IdResp' }
+  /admin/v1/course/catalog/update:
+    post:
+      tags: [AdminCourse]
+      summary: 更新课程目录
+      requestBody: { $ref: '#/components/requestBodies/UpdateCatalogReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/course/catalog/delete:
+    post:
+      tags: [AdminCourse]
+      summary: 删除课程目录
+      requestBody: { $ref: '#/components/requestBodies/DeleteCatalogReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/course/catalog/update_sort:
+    post:
+      tags: [AdminCourse]
+      summary: 更新课程目录排序
+      requestBody: { $ref: '#/components/requestBodies/UpdateCatalogSortReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/course/catalog/info:
+    get:
+      tags: [AdminCourse]
+      summary: 课程目录详情
+      parameters:
+        - { name: course_id, in: query, required: true, schema: { type: integer, format: int64 }, description: 课程 ID }
+      responses:
+        '200': { $ref: '#/components/responses/CatalogInfoResp' }
+  /admin/v1/course/catalog/add_lesson:
+    post:
+      tags: [AdminCourse]
+      summary: 添加课时到课程目录
+      requestBody: { $ref: '#/components/requestBodies/AddCatalogLessonReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/course/catalog/remove_lesson:
+    post:
+      tags: [AdminCourse]
+      summary: 从课程目录移除课时
+      requestBody: { $ref: '#/components/requestBodies/RemoveCatalogLessonReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/course/catalog/update_lesson:
+    post:
+      tags: [AdminCourse]
+      summary: 更新课程目录课时
+      requestBody: { $ref: '#/components/requestBodies/UpdateCatalogLessonReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/order/list:
+    post:
+      tags: [AdminOrder]
+      summary: 订单列表
+      description: router.go 中订单路由写为 adminRoot.POST("v1/order/list", ...)，缺少前导 /；此处按业务期望整理为 /admin/v1/order/list，运行态需确认。
+      requestBody: { $ref: '#/components/requestBodies/GetOrderListReq' }
+      responses:
+        '200': { $ref: '#/components/responses/GetOrderListResp' }
+  /admin/v1/order/info:
+    get:
+      tags: [AdminOrder]
+      summary: 订单详情
+      description: router.go 中订单路由缺少前导 /；此处按业务期望整理，运行态需确认。
+      parameters:
+        - { name: order_id, in: query, required: true, schema: { type: integer, format: int64 }, description: 订单 ID }
+      responses:
+        '200': { $ref: '#/components/responses/OrderInfoResp' }
+  /admin/v1/order/statistic:
+    get:
+      tags: [AdminOrder]
+      summary: 订单统计
+      description: router.go 中订单路由缺少前导 /；此处按业务期望整理，运行态需确认。
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+        - { name: date_type, in: query, schema: { type: integer, format: int32 }, description: 日期类型：1 按天，2 按月，3 按季度，4 按年 }
+        - { name: goods_id, in: query, schema: { type: integer, format: int64 }, description: 商品 ID }
+        - { name: start_time, in: query, schema: { type: integer, format: int64 }, description: 开始时间 }
+        - { name: end_time, in: query, schema: { type: integer, format: int64 }, description: 结束时间 }
+      responses:
+        '200': { $ref: '#/components/responses/OrderStatResp' }
+  /admin/v1/order/refund:
+    post:
+      tags: [AdminOrder]
+      summary: 订单退款
+      description: router.go 中订单路由缺少前导 /；此处按业务期望整理，运行态需确认。
+      requestBody: { $ref: '#/components/requestBodies/OrderRefundReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /admin/v1/order/cancel:
+    post:
+      tags: [AdminOrder]
+      summary: 后台取消订单
+      description: router.go 中订单路由缺少前导 /；此处按业务期望整理，运行态需确认。
+      requestBody: { $ref: '#/components/requestBodies/CancelOrderReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+components:
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: token
+      description: 管理后台登录 token。白名单接口无需传入。
+  parameters:
+    page: { name: page, in: query, schema: { type: integer, default: 1 }, description: 页码 }
+    limit: { name: limit, in: query, schema: { type: integer, default: 10, maximum: 1000 }, description: 每页条数 }
+    unlimited: { name: unlimited, in: query, schema: { type: boolean, default: false }, description: 是否不限制分页上限 }
+    once: { name: once, in: query, schema: { type: string }, description: 一次性随机串 }
+    ts: { name: ts, in: query, schema: { type: integer, format: int64 }, description: 时间戳 }
+    sign: { name: sign, in: query, schema: { type: string }, description: 签名，sha256(once + 固定秘钥 + ts) 小写 }
+  requestBodies:
+    CheckCaptchaReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CheckCaptchaReq' } } } }
+    GetSmsVerifyCodeReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GetSmsVerifyCodeReq' } } } }
+    MobilePasswordLoginReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MobilePasswordLoginReq' } } } }
+    MobileVerifyCodeLoginReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MobileVerifyCodeLoginReq' } } } }
+    MobilePasswordResetReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MobilePasswordResetReq' } } } }
+    LarkQrCodeLoginReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/LarkQrCodeReq' } } } }
+    LarkQrCodeBindReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/LarkQrCodeReq' } } } }
+    CreateUserReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateUserReq' } } } }
+    UpdateUserReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateUserReq' } } } }
+    DeleteUserReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/DeleteUserReq' } } } }
+    AddPermissionReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AddPermissionReq' } } } }
+    UpdatePermissionReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdatePermissionReq' } } } }
+    DeletePermissionReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/DeletePermissionReq' } } } }
+    AddRoleReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AddRoleReq' } } } }
+    UpdateRoleReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateRoleReq' } } } }
+    SetRolePermReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SetRolePermReq' } } } }
+    GetTempSecretReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GetTempSecretReq' } } } }
+    AddCategoryReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AddCategoryReq' } } } }
+    UpdateCategoryReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateCategoryReq' } } } }
+    DeleteCategoryReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/DeleteCategoryReq' } } } }
+    UpdateSortListReq: { required: true, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/UpdateSort' } } } } }
+    CreateLessonReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateLessonReq' } } } }
+    UpdateLessonReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateLessonReq' } } } }
+    MoveLessonReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MoveLessonReq' } } } }
+    UpdateLessonStatusReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateLessonStatusReq' } } } }
+    ListLessonReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ListLessonReq' } } } }
+    CreateCourseReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateCourseReq' } } } }
+    UpdateCourseReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateCourseReq' } } } }
+    UpdateCourseStatusReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateCourseStatusReq' } } } }
+    AddCatalogReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AddCatalogReq' } } } }
+    UpdateCatalogReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateCatalogReq' } } } }
+    DeleteCatalogReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/DeleteCatalogReq' } } } }
+    UpdateCatalogSortReq: { required: true, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/UpdateCatalogSortDto' } } } } }
+    AddCatalogLessonReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AddCatalogLessonReq' } } } }
+    RemoveCatalogLessonReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RemoveCatalogLessonReq' } } } }
+    UpdateCatalogLessonReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateCatalogLessonReq' } } } }
+    GetOrderListReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GetOrderListReq' } } } }
+    OrderRefundReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/OrderRefundReq' } } } }
+    CancelOrderReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CancelOrderReq' } } } }
+  responses:
+    EmptyResp: { description: 统一空响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { nullable: true, description: 空数据 } } } ] } } } }
+    IdResp: { description: 返回 ID, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/IdData' } } } ] } } } }
+    Int64Resp: { description: 返回 int64 数据, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { type: integer, format: int64, description: 分类 ID } } } ] } } } }
+    GetVerifyCaptchaResp: { description: 滑块验证码响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/GetVerifyCaptchaRespData' } } } ] } } } }
+    CheckCaptchaResp: { description: 滑块校验响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/CheckCaptchaDtoResp' } } } ] } } } }
+    AdminLoginResp: { description: 管理员登录响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/AdminLoginRespData' } } } ] } } } }
+    ListCustomerUserResp: { description: C 端用户列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/ListCustomerUserRespData' } } } ] } } } }
+    CustomerUserInfoResp: { description: C 端用户详情响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/CustomerUserInfoDto' } } } ] } } } }
+    ListAdminUserResp: { description: 管理员列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/ListAdminUserRespData' } } } ] } } } }
+    AdminUserWithRoleResp: { description: 管理员详情响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/AdminUserWithRoleDto' } } } ] } } } }
+    PermissionListResp: { description: 权限列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/PermissionListRespData' } } } ] } } } }
+    MyPermissionListResp: { description: 当前管理员权限列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/PermissionDto' } } } } ] } } } }
+    ListRoleResp: { description: 角色列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/ListRoleRespData' } } } ] } } } }
+    MyRolesResp: { description: 当前管理员角色列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/RoleDto' } } } } ] } } } }
+    TempSecretResp: { description: 对象存储临时密钥响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/TempSecretRespData' } } } ] } } } }
+    CategoryListResp: { description: 分类列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/CategoryDto' } } } } ] } } } }
+    ListLessonResp: { description: 课时列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/ListLessonRespData' } } } ] } } } }
+    LessonResp: { description: 课时详情响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/LessonDto' } } } ] } } } }
+    CourseResp: { description: 课程详情响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/CourseDto' } } } ] } } } }
+    CourseListResp: { description: 课程列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/CourseListRespData' } } } ] } } } }
+    CatalogInfoResp: { description: 课程目录响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/CatalogInfoRespData' } } } ] } } } }
+    GetOrderListResp: { description: 订单列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/GetOrderListRespData' } } } ] } } } }
+    OrderInfoResp: { description: 订单详情响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/OrderInfoRespData' } } } ] } } } }
+    OrderStatResp: { description: 订单统计响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/OrderStatRespData' } } } ] } } } }
+  schemas:
+    Resp:
+      type: object
+      properties:
+        code: { type: integer, description: 业务状态码 }
+        msg: { type: string, description: 面向用户的状态消息 }
+        err_msg: { type: string, description: 错误详情 }
+        is_aes: { type: boolean, description: data 是否 AES 加密 }
+        data: { nullable: true, description: 业务数据 }
+    IdData:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 新增记录 ID }
+    Pager:
+      type: object
+      properties:
+        page: { type: integer, description: 页码 }
+        limit: { type: integer, description: 每页条数 }
+        unlimited: { type: boolean, description: 是否不限制分页上限 }
+    IDName:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: ID }
+        name: { type: string, description: 名称 }
+    IDSort:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: ID }
+        sort: { type: integer, format: int32, description: 排序值 }
+    GetVerifyCaptchaRespData:
+      type: object
+      properties:
+        key: { type: string, description: 验证码 key }
+        image_base64: { type: string, description: 背景图 base64，含 data:image 前缀 }
+        title_image_base64: { type: string, description: 滑块图 base64，含 data:image 前缀 }
+        title_height: { type: integer, description: 滑块图高度 }
+        title_width: { type: integer, description: 滑块图宽度 }
+        title_x: { type: integer, description: 滑块图 X 坐标 }
+        title_y: { type: integer, description: 滑块图 Y 坐标 }
+        expire: { type: integer, format: int64, description: 过期时间 }
+    CheckCaptchaReq:
+      type: object
+      properties:
+        key: { type: string, description: 验证码 key }
+        slide_x: { type: integer, description: 滑块 X 坐标 }
+        slide_y: { type: integer, description: 滑块 Y 坐标 }
+    CheckCaptchaDtoResp:
+      type: object
+      properties:
+        ticket: { type: string, description: 校验成功 ticket }
+        expire: { type: integer, format: int64, description: ticket 过期时间 }
+    GetSmsVerifyCodeReq:
+      type: object
+      properties:
+        scene: { type: string, description: 使用场景，如 login、register、reset_password }
+        mobile: { type: string, description: 手机号 }
+        ticket: { type: string, description: 图形验证码 ticket }
+    MobilePasswordLoginReq:
+      type: object
+      properties:
+        mobile: { type: string, description: 手机号 }
+        password: { type: string, description: 密码 }
+        ticket: { type: string, description: 图形验证码 ticket }
+    MobileVerifyCodeLoginReq:
+      type: object
+      properties:
+        mobile: { type: string, description: 手机号 }
+        verify_code: { type: string, description: 短信验证码 }
+    MobilePasswordResetReq:
+      type: object
+      properties:
+        mobile: { type: string, description: 手机号 }
+        password: { type: string, description: 新密码 }
+        confirm_pwd: { type: string, description: 确认密码 }
+        verify_code: { type: string, description: 短信验证码 }
+    LarkQrCodeReq:
+      type: object
+      properties:
+        app_code: { type: integer, format: int32, description: 飞书应用编码 }
+        code: { type: string, description: 飞书授权 code }
+        redirect_uri: { type: string, description: 回调地址 }
+    AdminLoginRespData:
+      type: object
+      properties:
+        token: { type: string, description: 登录 token }
+        user: { $ref: '#/components/schemas/AdminUserDto' }
+    AdminUserDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 管理员记录 ID }
+        user_id: { type: integer, format: int64, description: 关联用户 ID }
+        name: { type: string, description: 用户名 }
+        nick_name: { type: string, description: 昵称 }
+        sex: { type: integer, format: int32, description: 性别 }
+        status: { type: integer, format: int32, description: 状态 }
+        mobile: { type: string, description: 手机号 }
+        lark_open_id: { type: string, description: 飞书 OpenID }
+        update_at: { type: integer, format: int64, description: 更新时间 }
+        create_at: { type: integer, format: int64, description: 创建时间 }
+    AdminUserWithRoleDto:
+      allOf:
+        - $ref: '#/components/schemas/AdminUserDto'
+        - type: object
+          properties:
+            roles: { type: array, items: { $ref: '#/components/schemas/IDName' }, description: 角色列表 }
+    CreateUserReq:
+      type: object
+      properties:
+        name: { type: string, description: 用户名 }
+        nick_name: { type: string, description: 昵称 }
+        mobile: { type: string, description: 手机号 }
+        sex: { type: integer, format: int32, description: 性别 }
+        role_ids: { type: array, items: { type: integer, format: int64 }, description: 角色 ID 列表 }
+    UpdateUserReq:
+      allOf:
+        - $ref: '#/components/schemas/CreateUserReq'
+        - type: object
+          properties:
+            id: { type: integer, format: int64, description: 管理员记录 ID }
+            status: { type: integer, format: int32, description: 状态 }
+    DeleteUserReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 管理员记录 ID }
+    ListAdminUserRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            total: { type: integer, format: int64, description: 总数 }
+            list: { type: array, items: { $ref: '#/components/schemas/AdminUserWithRoleDto' }, description: 管理员列表 }
+    UserDto:
+      type: object
+      properties:
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        nick_name: { type: string, description: 昵称 }
+        create_at: { type: integer, format: int64, description: 创建时间 }
+        icon_url: { type: string, description: 头像 URL }
+        sex: { type: integer, format: int32, description: 性别 }
+        status: { type: integer, format: int32, description: 状态 }
+        last_login_at: { type: integer, format: int64, description: 最近登录时间 }
+        update_at: { type: integer, format: int64, description: 更新时间 }
+        wechat_bind: { type: boolean, description: 是否绑定微信 }
+        can_unbind_wechat: { type: boolean, description: 是否可解绑微信 }
+        has_password: { type: boolean, description: 是否有密码 }
+    MobileUser:
+      type: object
+      properties:
+        mobile: { type: string, description: 手机号 }
+        user_id: { type: integer, format: int64, description: 用户 ID }
+    WechatUser:
+      type: object
+      properties:
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        union_id: { type: string, description: 微信 UnionID }
+    AppUser:
+      type: object
+      properties:
+        open_id: { type: string, description: 应用 OpenID }
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        app_code: { type: integer, format: int32, description: 应用编码 }
+    UserInfoDto:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/UserDto' }
+        mobile_user: { $ref: '#/components/schemas/MobileUser' }
+        wechat_user: { $ref: '#/components/schemas/WechatUser' }
+        app_users: { type: array, items: { $ref: '#/components/schemas/AppUser' }, description: 应用用户绑定列表 }
+    CustomerUserDto:
+      allOf:
+        - $ref: '#/components/schemas/UserDto'
+        - type: object
+          properties:
+            mobile: { type: string, description: 手机号 }
+    CustomerUserInfoDto:
+      allOf:
+        - $ref: '#/components/schemas/UserInfoDto'
+        - type: object
+          properties:
+            user_courses: { type: array, items: { $ref: '#/components/schemas/PurchasedCourseDto' }, description: 用户已购课程 }
+    ListCustomerUserRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            list: { type: array, items: { $ref: '#/components/schemas/CustomerUserDto' }, description: 用户列表 }
+            total: { type: integer, format: int64, description: 总数 }
+    PermissionDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 权限 ID }
+        code: { type: string, description: 权限编码 }
+        type: { type: integer, format: int32, description: 权限类型：1 菜单，2 操作 }
+        name: { type: string, description: 权限名称 }
+        page_path: { type: string, description: 菜单路径 }
+        parent_id: { type: integer, format: int64, description: 父级权限 ID }
+        status: { type: integer, format: int32, description: 状态：1 正常，-1 禁用 }
+        sort: { type: integer, format: int32, description: 排序值 }
+        desc: { type: string, description: 权限描述 }
+        update_at: { type: integer, format: int64, description: 更新时间 }
+    AddPermissionReq:
+      type: object
+      properties:
+        code: { type: string, description: 权限编码 }
+        desc: { type: string, description: 权限描述 }
+        type: { type: integer, format: int32, description: 权限类型：1 菜单，2 操作 }
+        name: { type: string, description: 权限名称 }
+        page_path: { type: string, description: 菜单路径 }
+        parent_id: { type: integer, format: int64, description: 父级权限 ID }
+        sort: { type: integer, format: int32, description: 排序值 }
+    UpdatePermDto:
+      allOf:
+        - $ref: '#/components/schemas/AddPermissionReq'
+        - type: object
+          properties:
+            id: { type: integer, format: int64, description: 权限 ID }
+    UpdatePermissionReq:
+      type: object
+      properties:
+        list: { type: array, items: { $ref: '#/components/schemas/UpdatePermDto' }, description: 待更新权限列表 }
+    DeletePermissionReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 权限 ID }
+    PermissionListRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            total: { type: integer, format: int64, description: 总数 }
+            list: { type: array, items: { $ref: '#/components/schemas/PermissionDto' }, description: 权限列表 }
+    AddRoleReq:
+      type: object
+      properties:
+        name: { type: string, description: 角色名称 }
+        desc: { type: string, description: 角色描述 }
+    UpdateRoleReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 角色 ID }
+        name: { type: string, description: 角色名称 }
+        desc: { type: string, description: 角色描述 }
+        status: { type: integer, format: int32, description: 角色状态 }
+    SetRolePermReq:
+      type: object
+      properties:
+        role_id: { type: integer, format: int64, description: 角色 ID }
+        perm_ids: { type: array, items: { type: integer, format: int64 }, description: 权限 ID 列表 }
+    RoleDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 角色 ID }
+        name: { type: string, description: 角色名称 }
+        desc: { type: string, description: 角色描述 }
+        status: { type: integer, format: int32, description: 状态 }
+        perms: { type: array, items: { $ref: '#/components/schemas/IDName' }, description: 权限列表 }
+        create_at: { type: integer, format: int64, description: 创建时间 }
+        update_at: { type: integer, format: int64, description: 更新时间 }
+    ListRoleRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            total: { type: integer, format: int64, description: 总数 }
+            list: { type: array, items: { $ref: '#/components/schemas/RoleDto' }, description: 角色列表 }
+    GetTempSecretReq:
+      type: object
+      properties:
+        scene: { type: string, description: 上传场景 }
+        file_name: { type: string, description: 文件名 }
+        file_size: { type: integer, format: int64, description: 文件大小，字节 }
+        file_type: { type: string, description: 文件类型 }
+        client_ip: { type: string, description: 客户端 IP }
+    TempSecretRespData:
+      type: object
+      properties:
+        secret_id: { type: string, description: 临时 SecretId }
+        secret_key: { type: string, description: 临时 SecretKey }
+        security_token: { type: string, description: 临时安全 token }
+        expired_time: { type: integer, format: int64, description: 过期时间 }
+        start_time: { type: integer, format: int64, description: 生效时间 }
+        bucket: { type: string, description: 存储桶 }
+        region: { type: string, description: 地域 }
+        key: { type: string, description: 对象 key }
+        file_url: { type: string, description: 文件 URL }
+    AddCategoryReq:
+      type: object
+      properties:
+        name: { type: string, description: 分类名称 }
+        parent_id: { type: integer, format: int64, description: 父分类 ID }
+        level: { type: integer, format: int32, description: 层级 }
+        sort: { type: integer, format: int32, description: 排序值 }
+    UpdateCategoryReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 分类 ID }
+        name: { type: string, description: 分类名称 }
+    DeleteCategoryReq:
+      type: object
+      properties:
+        ids: { type: array, items: { type: integer, format: int64 }, description: 分类 ID 列表 }
+    UpdateSort:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 分类 ID }
+        sort: { type: integer, format: int32, description: 排序值 }
+        level: { type: integer, format: int32, description: 层级 }
+        parent_id: { type: integer, format: int64, description: 父分类 ID }
+    CategoryDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 分类 ID }
+        name: { type: string, description: 分类名称 }
+        sort: { type: integer, format: int32, description: 排序值 }
+        parent_id: { type: integer, format: int64, description: 父分类 ID }
+        level: { type: integer, format: int32, description: 层级 }
+    Attachment:
+      type: object
+      properties:
+        origin_name: { type: string, description: 原始文件名 }
+        file_key: { type: string, description: 文件 key }
+        file_url: { type: string, description: 文件 URL }
+    LessonChapter:
+      type: object
+      properties:
+        id: { type: string, description: 章节 ID }
+        name: { type: string, description: 章节名称 }
+        begin_position: { type: integer, format: int64, description: 开始播放位置 }
+        end_position: { type: integer, format: int64, description: 结束播放位置 }
+    CreateLessonReq:
+      type: object
+      properties:
+        name: { type: string, description: 课时名称 }
+        detail: { type: string, description: 课时详情 }
+        category_id: { type: integer, format: int64, description: 分类 ID }
+        video_key: { type: string, description: 视频文件 key }
+        attachments: { type: array, items: { $ref: '#/components/schemas/Attachment' }, description: 附件列表 }
+        duration: { type: integer, format: int32, description: 时长，单位秒 }
+        chapters: { type: array, items: { $ref: '#/components/schemas/LessonChapter' }, description: 章节列表 }
+        video_file_name: { type: string, description: 视频文件名 }
+    UpdateLessonReq:
+      allOf:
+        - $ref: '#/components/schemas/CreateLessonReq'
+        - type: object
+          properties:
+            id: { type: integer, format: int64, description: 课时 ID }
+    MoveLessonReq:
+      type: object
+      properties:
+        lesson_ids: { type: array, items: { type: integer, format: int64 }, description: 课时 ID 列表 }
+        category_id: { type: integer, format: int64, description: 目标分类 ID }
+    UpdateLessonStatusReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 课时 ID }
+        status: { type: integer, format: int32, description: 课时状态 }
+    ListLessonReq:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            course_id: { type: integer, format: int64, description: 课程 ID }
+            id: { type: integer, format: int64, description: 课时 ID }
+            on_view: { type: boolean, description: 是否前台可见过滤 }
+            name_kw: { type: string, description: 课时名称关键词 }
+            category_id: { type: integer, format: int64, description: 分类 ID }
+            status: { type: integer, format: int32, description: 状态 }
+            start_create_time: { type: integer, format: int64, description: 创建开始时间 }
+            end_create_time: { type: integer, format: int64, description: 创建结束时间 }
+            begin_update_time: { type: integer, format: int64, description: 更新开始时间 }
+            end_update_time: { type: integer, format: int64, description: 更新结束时间 }
+    LessonDto:
+      allOf:
+        - type: object
+          properties:
+            create_name: { type: string, description: 创建人名称 }
+            update_name: { type: string, description: 更新人名称 }
+            id: { type: integer, format: int64, description: 课时 ID }
+            name: { type: string, description: 课时名称 }
+            detail: { type: string, description: 课时详情 }
+            category_id: { type: integer, format: int64, description: 分类 ID }
+            category_name: { type: string, description: 分类名称 }
+            video_key: { type: string, description: 视频文件 key }
+            video_url: { type: string, description: 视频 URL }
+            video_file_name: { type: string, description: 视频文件名 }
+            attachments: { type: array, items: { $ref: '#/components/schemas/Attachment' }, description: 附件列表 }
+            duration: { type: integer, format: int32, description: 时长，单位秒 }
+            chapters: { type: array, items: { $ref: '#/components/schemas/LessonChapter' }, description: 章节列表 }
+            status: { type: integer, format: int32, description: 状态 }
+            create_by: { type: integer, format: int64, description: 创建人 ID }
+            update_by: { type: integer, format: int64, description: 更新人 ID }
+            create_at: { type: integer, format: int64, description: 创建时间 }
+            update_at: { type: integer, format: int64, description: 更新时间 }
+    ListLessonRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            list: { type: array, items: { $ref: '#/components/schemas/LessonDto' }, description: 课时列表 }
+            total: { type: integer, format: int64, description: 总数 }
+    CreateCourseReq:
+      type: object
+      properties:
+        name: { type: string, description: 课程名称 }
+        course_price: { type: integer, format: int64, description: 课程价格，单位分 }
+        service_time: { type: integer, format: int32, description: 服务时长 }
+        learn_time: { type: integer, format: int32, description: 可学习时长 }
+        sort: { type: integer, format: int32, description: 排序值 }
+        features: { type: array, items: { type: string }, description: 课程特色 }
+        update_status: { type: integer, format: int32, description: 更新状态 }
+        cover_key: { type: string, description: 封面 key }
+        detail_cover_key: { type: string, description: 详情封面 key }
+        detail: { type: string, description: 课程详情 }
+    UpdateCourseReq:
+      allOf:
+        - $ref: '#/components/schemas/CreateCourseReq'
+        - type: object
+          properties:
+            id: { type: integer, format: int64, description: 课程 ID }
+    UpdateCourseStatusReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 课程 ID }
+        status: { type: integer, format: int32, description: 状态 }
+    CourseDto:
+      allOf:
+        - type: object
+          properties:
+            create_name: { type: string, description: 创建人名称 }
+            update_name: { type: string, description: 更新人名称 }
+            id: { type: integer, format: int64, description: 课程 ID }
+            name: { type: string, description: 课程名称 }
+            course_price: { type: integer, format: int64, description: 课程价格，单位分 }
+            service_time: { type: integer, format: int32, description: 服务时长 }
+            learn_time: { type: integer, format: int32, description: 可学习时长 }
+            sort: { type: integer, format: int32, description: 排序值 }
+            status: { type: integer, format: int32, description: 状态 }
+            features: { type: array, items: { type: string }, description: 课程特色 }
+            update_status: { type: integer, format: int32, description: 更新状态 }
+            has_purchased: { type: boolean, description: 是否已购买 }
+            cover_key: { type: string, description: 封面 key }
+            cover_url: { type: string, description: 封面 URL }
+            detail_cover_key: { type: string, description: 详情封面 key }
+            detail_cover_url: { type: string, description: 详情封面 URL }
+            detail: { type: string, description: 课程详情 }
+            create_by: { type: integer, format: int64, description: 创建人 ID }
+            update_by: { type: integer, format: int64, description: 更新人 ID }
+            create_at: { type: integer, format: int64, description: 创建时间 }
+            update_at: { type: integer, format: int64, description: 更新时间 }
+    CourseListRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            list: { type: array, items: { $ref: '#/components/schemas/CourseDto' }, description: 课程列表 }
+            total: { type: integer, format: int64, description: 总数 }
+    PurchasedCourseDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 课程 ID }
+        name: { type: string, description: 课程名称 }
+        service_expire_time: { type: integer, format: int64, description: 服务过期时间 }
+        learn_expire_time: { type: integer, format: int64, description: 学习过期时间 }
+        features: { type: array, items: { type: string }, description: 课程特色 }
+        update_status: { type: integer, format: int32, description: 更新状态 }
+        has_purchased: { type: boolean, description: 是否已购买 }
+        cover_key: { type: string, description: 封面 key }
+        cover_url: { type: string, description: 封面 URL }
+        detail_cover_key: { type: string, description: 详情封面 key }
+        detail_cover_url: { type: string, description: 详情封面 URL }
+        detail: { type: string, description: 详情 }
+    AddCatalogReq:
+      type: object
+      properties:
+        course_id: { type: integer, format: int64, description: 课程 ID }
+        name: { type: string, description: 目录名称 }
+        parent_id: { type: integer, format: int64, description: 父目录 ID }
+        sort: { type: integer, format: int32, description: 排序值 }
+        level: { type: integer, format: int32, description: 层级 }
+    UpdateCatalogReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 目录 ID }
+        name: { type: string, description: 目录名称 }
+    DeleteCatalogReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 目录 ID }
+    AddCatalogLessonReq:
+      type: object
+      properties:
+        course_id: { type: integer, format: int64, description: 课程 ID }
+        catalog_id: { type: integer, format: int64, description: 目录 ID }
+        lesson_ids: { type: array, items: { type: integer, format: int64 }, description: 课时 ID 列表 }
+    RemoveCatalogLessonReq:
+      type: object
+      properties:
+        ids: { type: array, items: { type: integer, format: int64 }, description: 目录课时关联 ID 列表 }
+    UpdateCatalogLessonReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 目录课时关联 ID }
+        enable_trial: { type: integer, format: int32, description: 是否允许试看 }
+        name: { type: string, description: 目录内展示名称；代码 tag 为 json:"name\t"，疑似笔误 }
+        show_time: { type: integer, format: int64, description: 展示时间点 }
+    UpdateCatalogSortDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 目录 ID }
+        sort: { type: integer, format: int32, description: 排序值 }
+        parent_id: { type: integer, format: int64, description: 父目录 ID }
+        level: { type: integer, format: int32, description: 层级 }
+        lessons: { type: array, items: { $ref: '#/components/schemas/IDSort' }, description: 课时排序列表 }
+    CatalogInfoRespData:
+      type: object
+      properties:
+        total_duration: { type: integer, format: int64, description: 课时总时长 }
+        lesson_count: { type: integer, format: int64, description: 课时数量 }
+        catalogs: { type: array, items: { $ref: '#/components/schemas/CatalogDto' }, description: 目录列表 }
+    CatalogDto:
+      type: object
+      properties:
+        course_id: { type: integer, format: int64, description: 课程 ID }
+        id: { type: integer, format: int64, description: 目录 ID }
+        name: { type: string, description: 目录名称 }
+        sort: { type: integer, format: int32, description: 排序值 }
+        parent_id: { type: integer, format: int64, description: 父目录 ID }
+        level: { type: integer, format: int32, description: 层级 }
+        lessons: { type: array, items: { $ref: '#/components/schemas/CatalogLessonDto' }, description: 目录下课时 }
+        lesson_count: { type: integer, format: int64, description: 课时数量 }
+    CatalogLessonDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 目录课时关联 ID }
+        lesson_id: { type: integer, format: int64, description: 课时 ID }
+        index: { type: integer, description: 课时序号 }
+        name: { type: string, description: 目录内展示名称 }
+        lesson_name: { type: string, description: 原课时名称 }
+        detail: { type: string, description: 课时详情 }
+        video_url: { type: string, description: 视频 URL }
+        video_file_name: { type: string, description: 视频文件名 }
+        duration: { type: integer, format: int32, description: 时长，单位秒 }
+        status: { type: integer, format: int32, description: 状态 }
+        show_time: { type: integer, format: int64, description: 展示时间点 }
+        enable_trial: { type: integer, format: int32, description: 是否允许试看 }
+    GetOrderListReq:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            user_id: { type: integer, format: int64, description: 用户 ID }
+            order_id: { type: integer, format: int64, description: 订单 ID }
+            status: { type: integer, format: int32, description: 订单状态 }
+            status_list: { type: string, description: 订单状态列表，逗号分隔 }
+            goods_name_kw: { type: string, description: 商品名称关键词 }
+            create_start: { type: integer, format: int64, description: 创建开始时间 }
+            create_end: { type: integer, format: int64, description: 创建结束时间 }
+            payment_start: { type: integer, format: int64, description: 支付开始时间 }
+            payment_end: { type: integer, format: int64, description: 支付结束时间 }
+            refund_start: { type: integer, format: int64, description: 退款开始时间 }
+            refund_end: { type: integer, format: int64, description: 退款结束时间 }
+    OrderRefundReq:
+      type: object
+      properties:
+        order_id: { type: integer, format: int64, description: 订单 ID }
+        reason: { type: string, description: 退款原因 }
+        amount: { type: integer, format: int64, description: 退款金额，单位分 }
+        item_ids: { type: array, items: { type: integer, format: int64 }, description: 退款订单明细 ID 列表 }
+    CancelOrderReq:
+      type: object
+      properties:
+        order_id: { type: integer, format: int64, description: 订单 ID }
+        reason: { type: string, description: 取消原因 }
+    GetOrderListRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            total: { type: integer, format: int64, description: 总数 }
+            list: { type: array, items: { $ref: '#/components/schemas/OrderDto' }, description: 订单列表 }
+    OrderInfoRespData:
+      allOf:
+        - $ref: '#/components/schemas/OrderDto'
+        - type: object
+          properties:
+            items: { type: array, items: { $ref: '#/components/schemas/OrderItemDto' }, description: 订单商品明细 }
+            refunds: { type: array, items: { $ref: '#/components/schemas/RefundDto' }, description: 退款记录 }
+    OrderDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 订单 ID }
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        status: { type: integer, format: int32, description: 订单状态：-1 已取消，1 待支付，2 已支付，3 已退款，4 已发货，5 已签收，6 已完成 }
+        order_source: { type: integer, format: int32, description: 订单来源：1 用户下单，2 管理后台，3 系统赠送 }
+        order_amount: { type: integer, format: int64, description: 订单金额，单位分 }
+        discount_amount: { type: integer, format: int64, description: 优惠金额，单位分 }
+        payment_amount: { type: integer, format: int64, description: 实付金额，单位分 }
+        trade_no: { type: string, description: 支付平台订单号 }
+        inner_trade_no: { type: string, description: 内部支付订单号 }
+        order_desc: { type: string, description: 订单描述 }
+        payment_at: { type: integer, format: int64, description: 支付时间，毫秒时间戳 }
+        user_remark: { type: string, description: 用户备注 }
+        receiver_confirm_at: { type: integer, format: int64, description: 确认收货时间 }
+        receiver_confirm_type: { type: integer, format: int32, description: 确认收货方式 }
+        refund_amount: { type: integer, format: int64, description: 累计退款金额，单位分 }
+        refund_at: { type: integer, format: int64, description: 最近退款完成时间 }
+        cancel_at: { type: integer, format: int64, description: 取消时间 }
+        cancel_type: { type: integer, format: int32, description: 取消类型：1 用户取消，2 客服取消，3 超时取消 }
+        cancel_by: { type: integer, format: int64, description: 取消人 ID }
+        cancel_reason: { type: string, description: 取消理由 }
+        create_at: { type: integer, format: int64, description: 创建时间 }
+        create_by: { type: integer, format: int64, description: 创建人 ID }
+        cancel_name: { type: string, description: 取消人名称 }
+        create_name: { type: string, description: 创建人名称 }
+        user_name: { type: string, description: 用户昵称 }
+        user_mobile: { type: string, description: 用户手机号 }
+    OrderItemDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 订单明细 ID }
+        order_id: { type: integer, format: int64, description: 订单 ID }
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        goods_id: { type: integer, format: int64, description: 商品 ID }
+        goods_type: { type: integer, format: int32, description: 商品类型 }
+        quantity: { type: integer, format: int32, description: 商品数量 }
+        payment_amount: { type: integer, format: int64, description: 实付金额，单位分 }
+        discount_amount: { type: integer, format: int64, description: 优惠金额，单位分 }
+        goods_snap: { type: object, description: 商品快照 }
+        refund_status: { type: integer, format: int32, description: 退款状态：0 无退款，1 退款中，2 退款完成，3 退款异常 }
+    RefundDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 退款记录 ID }
+        amount: { type: integer, format: int64, description: 退款金额，单位分 }
+        item_ids: { type: array, items: { type: integer, format: int64 }, description: 退款明细 ID 列表 }
+        apply_at: { type: integer, format: int64, description: 申请时间 }
+        status: { type: integer, format: int32, description: 退款状态：0 无退款，1 退款中，2 退款完成，3 退款异常 }
+        done_at: { type: integer, format: int64, description: 完成时间 }
+        reason: { type: string, description: 退款原因 }
+        refund_id: { type: string, description: 第三方退款单号 }
+        apply_user_id: { type: integer, format: int64, description: 申请人 ID }
+        refund_name: { type: string, description: 申请人名称 }
+        items: { type: array, items: { $ref: '#/components/schemas/OrderItemDto' }, description: 退款商品明细 }
+    OrderStatRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            total: { type: integer, format: int64, description: 总数 }
+            list: { type: array, items: { $ref: '#/components/schemas/OrderStatDto' }, description: 统计列表 }
+    OrderStatDto:
+      type: object
+      properties:
+        date: { type: string, description: 统计日期 }
+        order_count: { type: integer, format: int64, description: 订单数 }
+        order_amount: { type: integer, format: int64, description: 订单金额，单位分 }
+        payment_amount: { type: integer, format: int64, description: 实付金额，单位分 }
+        refund_amount: { type: integer, format: int64, description: 退款金额，单位分 }
+        refund_count: { type: integer, format: int64, description: 退款数 }
+        revenue_amount: { type: integer, format: int64, description: 收入金额，单位分 }

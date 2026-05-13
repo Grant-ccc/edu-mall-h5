@@ -1,0 +1,847 @@
+openapi: 3.0.3
+info:
+  title: Edu Mall Customer API
+  version: 1.0.0
+  description: |
+    C 端接口文档。所有业务接口路径均以 /api/mall 为全局前缀。
+    除微信支付/退款回调外，接口统一返回 Resp 包装结构。
+servers:
+  - url: /api/mall
+security:
+  - TokenAuth: []
+tags:
+  - name: CustomerAuth
+    description: C 端登录、验证码、微信扫码
+  - name: CustomerUser
+    description: C 端用户中心
+  - name: CustomerCourse
+    description: C 端课程、课时、学习进度
+  - name: CustomerCart
+    description: C 端购物车
+  - name: CustomerOrder
+    description: C 端订单与支付
+  - name: WechatCallback
+    description: 微信支付/退款回调
+paths:
+  /customer/v1/user/verify/captcha:
+    get:
+      tags: [CustomerAuth]
+      summary: 获取滑块验证码
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/once'
+        - $ref: '#/components/parameters/ts'
+        - $ref: '#/components/parameters/sign'
+      responses:
+        '200': { $ref: '#/components/responses/GetVerifyCaptchaResp' }
+  /customer/v1/user/verify/captcha/check:
+    post:
+      tags: [CustomerAuth]
+      summary: 校验滑块验证码
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/CheckCaptchaReq' }
+      responses:
+        '200': { $ref: '#/components/responses/CheckCaptchaResp' }
+  /customer/v1/user/verify/smscode:
+    post:
+      tags: [CustomerAuth]
+      summary: 发送短信验证码
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/GetSmsVerifyCodeReq' }
+      responses:
+        '200': { $ref: '#/components/responses/SmsVerifyCodeResp' }
+  /customer/v1/user/applet/login:
+    post:
+      tags: [CustomerAuth]
+      summary: 小程序登录
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/AppletLoginReq' }
+      responses:
+        '200': { $ref: '#/components/responses/LoginResp' }
+  /customer/v1/user/mobile/password_login:
+    post:
+      tags: [CustomerAuth]
+      summary: 手机号密码登录
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/MobilePasswordLoginReq' }
+      responses:
+        '200': { $ref: '#/components/responses/LoginResp' }
+  /customer/v1/user/mobile/verify_login:
+    post:
+      tags: [CustomerAuth]
+      summary: 手机号验证码登录/注册
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/MobileVerifyCodeLoginReq' }
+      responses:
+        '200': { $ref: '#/components/responses/LoginResp' }
+  /customer/v1/user/mobile/reset_password:
+    post:
+      tags: [CustomerAuth]
+      summary: 手机号重置密码
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/MobilePasswordResetReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /customer/v1/user/wechat/qrcode_login:
+    post:
+      tags: [CustomerAuth]
+      summary: 获取微信扫码登录二维码
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/WechatQrCodeReq' }
+      responses:
+        '200': { $ref: '#/components/responses/WechatQrCodeResp' }
+  /customer/v1/user/wechat/qrcode_status:
+    get:
+      tags: [CustomerAuth]
+      summary: 查询微信扫码状态
+      security: []
+      parameters:
+        - name: scene_token
+          in: query
+          schema: { type: string }
+          description: 扫码场景令牌
+      responses:
+        '200': { $ref: '#/components/responses/WechatQrCodeStatusResp' }
+  /customer/v1/user/wechat/scan_confirm:
+    post:
+      tags: [CustomerAuth]
+      summary: 微信扫码确认
+      security: []
+      requestBody: { $ref: '#/components/requestBodies/WechatScanConfirmReq' }
+      responses:
+        '200': { $ref: '#/components/responses/WechatQrCodeStatusResp' }
+  /customer/v1/wechat/callback/payment:
+    post:
+      tags: [WechatCallback]
+      summary: 微信支付结果回调
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, description: 微信支付 V3 回调原始报文 }
+      responses:
+        '200': { description: 微信回调处理成功, content: { application/json: { schema: { $ref: '#/components/schemas/WechatNotifyRsp' } } } }
+        '400': { description: 微信回调解析失败 }
+        '500': { description: 微信回调处理失败 }
+  /customer/v1/wechat/callback/refund:
+    post:
+      tags: [WechatCallback]
+      summary: 微信退款结果回调
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, description: 微信退款 V3 回调原始报文 }
+      responses:
+        '200': { description: 微信回调处理成功, content: { application/json: { schema: { $ref: '#/components/schemas/WechatNotifyRsp' } } } }
+        '400': { description: 微信回调解析失败 }
+        '500': { description: 微信回调处理失败 }
+  /customer/v1/user/info:
+    get:
+      tags: [CustomerUser]
+      summary: 获取当前用户信息
+      responses:
+        '200': { $ref: '#/components/responses/UserInfoResp' }
+  /customer/v1/user/change_password:
+    post:
+      tags: [CustomerUser]
+      summary: 修改密码
+      requestBody: { $ref: '#/components/requestBodies/ChangePasswordReq' }
+      responses:
+        '200': { $ref: '#/components/responses/ChangePasswordResp' }
+  /customer/v1/user/change_password/smscode:
+    post:
+      tags: [CustomerUser]
+      summary: 发送修改密码短信验证码
+      requestBody: { $ref: '#/components/requestBodies/ChangePasswordSmsCodeReq' }
+      responses:
+        '200': { $ref: '#/components/responses/SmsVerifyCodeResp' }
+  /customer/v1/user/wechat/qrcode_bind:
+    post:
+      tags: [CustomerUser]
+      summary: 获取微信绑定二维码
+      requestBody: { $ref: '#/components/requestBodies/WechatQrCodeReq' }
+      responses:
+        '200': { $ref: '#/components/responses/WechatQrCodeResp' }
+  /customer/v1/user/wechat/unbind:
+    post:
+      tags: [CustomerUser]
+      summary: 解绑微信
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /customer/v1/course/list:
+    get:
+      tags: [CustomerCourse]
+      summary: 课程列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+        - { name: id, in: query, schema: { type: integer, format: int64 }, description: 课程 ID }
+        - { name: name_kw, in: query, schema: { type: string }, description: 课程名称关键词 }
+        - { name: create_start_time, in: query, schema: { type: integer, format: int64 }, description: 创建开始时间，毫秒时间戳 }
+        - { name: create_end_time, in: query, schema: { type: integer, format: int64 }, description: 创建结束时间，毫秒时间戳 }
+        - { name: update_start_time, in: query, schema: { type: integer, format: int64 }, description: 更新开始时间，毫秒时间戳 }
+        - { name: update_end_time, in: query, schema: { type: integer, format: int64 }, description: 更新结束时间，毫秒时间戳 }
+        - { name: update_status, in: query, schema: { type: integer, format: int32 }, description: 更新状态 }
+        - { name: status, in: query, schema: { type: integer, format: int32 }, description: 课程状态，C 端服务会固定查询启用状态 }
+        - { name: is_recommend, in: query, schema: { type: boolean }, description: 是否推荐 }
+      responses:
+        '200': { $ref: '#/components/responses/CourseListResp' }
+  /customer/v1/course/detail:
+    get:
+      tags: [CustomerCourse]
+      summary: 课程详情
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: integer, format: int64 }, description: 课程 ID }
+      responses:
+        '200': { $ref: '#/components/responses/CourseDetailResp' }
+  /customer/v1/course/lesson/info:
+    get:
+      tags: [CustomerCourse]
+      summary: 课时信息
+      parameters:
+        - { name: lesson_id, in: query, required: true, schema: { type: integer, format: int64 }, description: 课时 ID }
+        - { name: user_id, in: query, schema: { type: integer, format: int64 }, description: 用户 ID，通常由登录态约束 }
+      responses:
+        '200': { $ref: '#/components/responses/LessonResp' }
+  /customer/v1/course/lesson/learn_info:
+    get:
+      tags: [CustomerCourse]
+      summary: 课时学习进度
+      parameters:
+        - { name: course_id, in: query, required: true, schema: { type: integer, format: int64 }, description: 课程 ID }
+        - { name: lesson_id, in: query, required: true, schema: { type: integer, format: int64 }, description: 课时 ID }
+      responses:
+        '200': { $ref: '#/components/responses/LessonLearnInfoResp' }
+  /customer/v1/course/lesson/learn_report:
+    post:
+      tags: [CustomerCourse]
+      summary: 上报课时学习进度
+      requestBody: { $ref: '#/components/requestBodies/LessonLearnReportReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /customer/v1/course/purchased/list:
+    get:
+      tags: [CustomerCourse]
+      summary: 已购买课程列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+      responses:
+        '200': { $ref: '#/components/responses/PurchasedCourseListResp' }
+  /customer/v1/course/continue/list:
+    get:
+      tags: [CustomerCourse]
+      summary: 继续学习课程列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+      responses:
+        '200': { $ref: '#/components/responses/ContinueLearnResp' }
+  /customer/v1/cart/add_goods:
+    post:
+      tags: [CustomerCart]
+      summary: 添加商品到购物车
+      requestBody: { $ref: '#/components/requestBodies/AddGoodsReq' }
+      responses:
+        '200': { $ref: '#/components/responses/IdResp' }
+  /customer/v1/cart/remove_goods:
+    post:
+      tags: [CustomerCart]
+      summary: 删除购物车商品
+      requestBody: { $ref: '#/components/requestBodies/RemoveGoodsReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /customer/v1/cart/list_goods:
+    get:
+      tags: [CustomerCart]
+      summary: 购物车商品列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+        - { name: goods_name_kw, in: query, schema: { type: string }, description: 商品名称关键词；代码 DTO 缺少 form tag，绑定行为需以运行态为准 }
+      responses:
+        '200': { $ref: '#/components/responses/ListGoodsResp' }
+  /customer/v1/order/calc_fee:
+    post:
+      tags: [CustomerOrder]
+      summary: 计算订单价格
+      requestBody: { $ref: '#/components/requestBodies/OrderCalcFeeReq' }
+      responses:
+        '200': { $ref: '#/components/responses/OrderCalcFeeResp' }
+  /customer/v1/order/pay_now:
+    post:
+      tags: [CustomerOrder]
+      summary: 立即创建订单并发起支付
+      requestBody: { $ref: '#/components/requestBodies/OrderPayNowReq' }
+      responses:
+        '200': { $ref: '#/components/responses/OrderPayNowResp' }
+  /customer/v1/order/pay_later:
+    post:
+      tags: [CustomerOrder]
+      summary: 从订单列表发起支付
+      requestBody: { $ref: '#/components/requestBodies/OrderPayLaterReq' }
+      responses:
+        '200': { $ref: '#/components/responses/OrderPayNowResp' }
+  /customer/v1/order/cancel:
+    post:
+      tags: [CustomerOrder]
+      summary: 取消订单
+      requestBody: { $ref: '#/components/requestBodies/CancelOrderReq' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyResp' }
+  /customer/v1/order/list:
+    get:
+      tags: [CustomerOrder]
+      summary: 我的订单列表
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/unlimited'
+        - { name: order_id, in: query, schema: { type: integer, format: int64 }, description: 订单 ID }
+        - { name: status, in: query, schema: { type: integer, format: int32 }, description: 订单状态 }
+        - { name: status_list, in: query, schema: { type: string }, description: 订单状态列表，逗号分隔 }
+        - { name: goods_name_kw, in: query, schema: { type: string }, description: 商品名称关键词 }
+        - { name: create_start, in: query, schema: { type: integer, format: int64 }, description: 创建开始时间，毫秒时间戳 }
+        - { name: create_end, in: query, schema: { type: integer, format: int64 }, description: 创建结束时间，毫秒时间戳 }
+        - { name: payment_start, in: query, schema: { type: integer, format: int64 }, description: 支付开始时间，毫秒时间戳 }
+        - { name: payment_end, in: query, schema: { type: integer, format: int64 }, description: 支付结束时间，毫秒时间戳 }
+        - { name: refund_start, in: query, schema: { type: integer, format: int64 }, description: 退款开始时间，毫秒时间戳 }
+        - { name: refund_end, in: query, schema: { type: integer, format: int64 }, description: 退款结束时间，毫秒时间戳 }
+      responses:
+        '200': { $ref: '#/components/responses/UserOrderListResp' }
+  /customer/v1/order/info:
+    get:
+      tags: [CustomerOrder]
+      summary: 订单详情
+      description: router.go 中该路由写为 cstRoot.GET("v1/order/info", ...)，缺少前导 /；此处按业务期望整理为 /customer/v1/order/info，运行态需确认。
+      parameters:
+        - { name: order_id, in: query, required: true, schema: { type: integer, format: int64 }, description: 订单 ID }
+      responses:
+        '200': { $ref: '#/components/responses/OrderInfoResp' }
+components:
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: token
+      description: 登录 token。白名单接口无需传入。
+  parameters:
+    page: { name: page, in: query, schema: { type: integer, default: 1 }, description: 页码 }
+    limit: { name: limit, in: query, schema: { type: integer, default: 10, maximum: 1000 }, description: 每页条数 }
+    unlimited: { name: unlimited, in: query, schema: { type: boolean, default: false }, description: 是否不限制分页上限 }
+    once: { name: once, in: query, schema: { type: string }, description: 一次性随机串 }
+    ts: { name: ts, in: query, schema: { type: integer, format: int64 }, description: 时间戳 }
+    sign: { name: sign, in: query, schema: { type: string }, description: 签名，sha256(once + 固定秘钥 + ts) 小写 }
+  requestBodies:
+    CheckCaptchaReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CheckCaptchaReq' } } } }
+    GetSmsVerifyCodeReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GetSmsVerifyCodeReq' } } } }
+    AppletLoginReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AppletLoginReq' } } } }
+    MobilePasswordLoginReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MobilePasswordLoginReq' } } } }
+    MobileVerifyCodeLoginReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MobileVerifyCodeLoginReq' } } } }
+    MobilePasswordResetReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MobilePasswordResetReq' } } } }
+    WechatQrCodeReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/WechatQrCodeReq' } } } }
+    WechatScanConfirmReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/WechatScanConfirmReq' } } } }
+    ChangePasswordReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ChangePasswordReq' } } } }
+    ChangePasswordSmsCodeReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ChangePasswordSmsCodeReq' } } } }
+    LessonLearnReportReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/LessonLearnReportReq' } } } }
+    AddGoodsReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AddGoodsReq' } } } }
+    RemoveGoodsReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RemoveGoodsReq' } } } }
+    OrderCalcFeeReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/OrderCalcFeeReq' } } } }
+    OrderPayNowReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/OrderPayNowReq' } } } }
+    OrderPayLaterReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/OrderPayLaterReq' } } } }
+    CancelOrderReq: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CancelOrderReq' } } } }
+  responses:
+    EmptyResp: { description: 统一空响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { nullable: true, description: 空数据 } } } ] } } } }
+    IdResp: { description: 返回 ID, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/IdData' } } } ] } } } }
+    GetVerifyCaptchaResp: { description: 滑块验证码响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/GetVerifyCaptchaRespData' } } } ] } } } }
+    CheckCaptchaResp: { description: 滑块校验响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/CheckCaptchaDtoResp' } } } ] } } } }
+    SmsVerifyCodeResp: { description: 短信验证码响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/SmsVerifyCodeRespData' } } } ] } } } }
+    LoginResp: { description: 登录响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/LoginRespData' } } } ] } } } }
+    WechatQrCodeResp: { description: 微信二维码响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/WechatQrCodeRespData' } } } ] } } } }
+    WechatQrCodeStatusResp: { description: 微信扫码状态响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/WechatQrCodeStatusRespData' } } } ] } } } }
+    UserInfoResp: { description: 用户信息响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/UserInfoDto' } } } ] } } } }
+    ChangePasswordResp: { description: 修改密码响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/ChangePasswordRespData' } } } ] } } } }
+    CourseListResp: { description: 课程列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/CourseListRespData' } } } ] } } } }
+    CourseDetailResp: { description: 课程详情响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/CourseDetailDto' } } } ] } } } }
+    LessonResp: { description: 课时详情响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/LessonDto' } } } ] } } } }
+    LessonLearnInfoResp: { description: 学习进度响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/LessonLearnInfoRespData' } } } ] } } } }
+    PurchasedCourseListResp: { description: 已购买课程列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/PurchasedCourseListRespData' } } } ] } } } }
+    ContinueLearnResp: { description: 继续学习列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/ContinueLearnRespData' } } } ] } } } }
+    ListGoodsResp: { description: 购物车列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/ListGoodsRespData' } } } ] } } } }
+    OrderCalcFeeResp: { description: 计费响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/OrderCalcFeeRespData' } } } ] } } } }
+    OrderPayNowResp: { description: 支付参数响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/OrderPayNowRespData' } } } ] } } } }
+    UserOrderListResp: { description: 用户订单列表响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/UserOrderListRespData' } } } ] } } } }
+    OrderInfoResp: { description: 订单详情响应, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Resp' }, { type: object, properties: { data: { $ref: '#/components/schemas/OrderInfoRespData' } } } ] } } } }
+  schemas:
+    Resp:
+      type: object
+      properties:
+        code: { type: integer, description: 业务状态码 }
+        msg: { type: string, description: 面向用户的状态消息 }
+        err_msg: { type: string, description: 错误详情 }
+        is_aes: { type: boolean, description: data 是否 AES 加密 }
+        data: { nullable: true, description: 业务数据 }
+    IdData:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 新增或关联记录 ID }
+    Pager:
+      type: object
+      properties:
+        page: { type: integer, description: 页码 }
+        limit: { type: integer, description: 每页条数 }
+        unlimited: { type: boolean, description: 是否不限制分页上限 }
+    CheckCaptchaReq:
+      type: object
+      properties:
+        key: { type: string, description: 验证码 key }
+        slide_x: { type: integer, description: 滑块 X 坐标 }
+        slide_y: { type: integer, description: 滑块 Y 坐标 }
+    GetSmsVerifyCodeReq:
+      type: object
+      properties:
+        scene: { type: string, description: 使用场景，如 login、register、reset_password }
+        mobile: { type: string, description: 手机号 }
+        ticket: { type: string, description: 图形验证码校验 ticket }
+    MobilePasswordLoginReq:
+      type: object
+      properties:
+        mobile: { type: string, description: 手机号 }
+        password: { type: string, description: 密码 }
+        ticket: { type: string, description: 图形验证码 ticket }
+    MobileVerifyCodeLoginReq:
+      type: object
+      properties:
+        mobile: { type: string, description: 手机号 }
+        verify_code: { type: string, description: 短信验证码 }
+    MobilePasswordResetReq:
+      type: object
+      properties:
+        mobile: { type: string, description: 手机号 }
+        password: { type: string, description: 新密码 }
+        confirm_pwd: { type: string, description: 确认密码 }
+        verify_code: { type: string, description: 短信验证码 }
+    AppletLoginReq:
+      type: object
+      properties:
+        app_code: { type: integer, format: int32, description: 小程序应用编码 }
+        code: { type: string, description: 小程序登录 code }
+        platform: { type: string, description: 客户端平台 }
+    ChangePasswordReq:
+      type: object
+      properties:
+        old_password: { type: string, description: 旧密码 }
+        new_password: { type: string, description: 新密码 }
+        confirm_password: { type: string, description: 确认新密码 }
+        verify_code: { type: string, description: 短信验证码 }
+    ChangePasswordSmsCodeReq:
+      type: object
+      properties:
+        ticket: { type: string, description: 图形验证码 ticket }
+    WechatQrCodeReq:
+      type: object
+      properties:
+        purpose: { type: string, description: 二维码用途，如 login 或 bind }
+    WechatScanConfirmReq:
+      type: object
+      properties:
+        scene_token: { type: string, description: 扫码场景令牌 }
+        code: { type: string, description: 微信授权 code }
+    LessonLearnReportReq:
+      type: object
+      properties:
+        course_id: { type: integer, format: int64, description: 课程 ID }
+        lesson_id: { type: integer, format: int64, description: 课时 ID }
+        type: { type: integer, format: int32, description: 上报类型 }
+        play_position: { type: integer, format: int64, description: 当前播放位置，单位秒 }
+    AddGoodsReq:
+      type: object
+      properties:
+        goods_id: { type: integer, format: int64, description: 商品/课程 ID }
+    RemoveGoodsReq:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 购物车记录 ID }
+    OrderCalcFeeReq:
+      type: object
+      properties:
+        course_ids: { type: array, items: { type: integer, format: int64 }, description: 课程 ID 列表 }
+        platform: { type: string, description: 下单平台 }
+    OrderPayNowReq:
+      type: object
+      properties:
+        fee_uuid: { type: string, description: 计费唯一标识 }
+        remark: { type: string, description: 用户备注 }
+        platform: { type: string, description: 支付平台 }
+    OrderPayLaterReq:
+      type: object
+      properties:
+        order_id: { type: integer, format: int64, description: 订单 ID }
+        platform: { type: string, description: 支付平台 }
+    CancelOrderReq:
+      type: object
+      properties:
+        order_id: { type: integer, format: int64, description: 订单 ID }
+        reason: { type: string, description: 取消原因 }
+    GetVerifyCaptchaRespData:
+      type: object
+      properties:
+        key: { type: string, description: 验证码 key }
+        image_base64: { type: string, description: 背景图 base64，含 data:image 前缀 }
+        title_image_base64: { type: string, description: 滑块图 base64，含 data:image 前缀 }
+        title_height: { type: integer, description: 滑块图高度 }
+        title_width: { type: integer, description: 滑块图宽度 }
+        title_x: { type: integer, description: 滑块图 X 坐标 }
+        title_y: { type: integer, description: 滑块图 Y 坐标 }
+        expire: { type: integer, format: int64, description: 过期时间 }
+    CheckCaptchaDtoResp:
+      type: object
+      properties:
+        ticket: { type: string, description: 校验成功 ticket }
+        expire: { type: integer, format: int64, description: ticket 过期时间 }
+    SmsVerifyCodeRespData:
+      type: object
+      properties:
+        debug_verify_code: { type: string, description: 调试验证码，仅调试环境可能返回 }
+    LoginRespData:
+      type: object
+      properties:
+        token: { type: string, description: 登录 token }
+        user_info: { $ref: '#/components/schemas/UserInfoDto' }
+    UserInfoDto:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/UserDto' }
+        mobile_user: { $ref: '#/components/schemas/MobileUser' }
+        wechat_user: { $ref: '#/components/schemas/WechatUser' }
+        app_users: { type: array, items: { $ref: '#/components/schemas/AppUser' }, description: 小程序/应用用户绑定列表 }
+    UserDto:
+      type: object
+      properties:
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        nick_name: { type: string, description: 昵称 }
+        create_at: { type: integer, format: int64, description: 创建时间，毫秒时间戳 }
+        icon_url: { type: string, description: 头像 URL }
+        sex: { type: integer, format: int32, description: 性别 }
+        status: { type: integer, format: int32, description: 用户状态 }
+        last_login_at: { type: integer, format: int64, description: 最近登录时间 }
+        update_at: { type: integer, format: int64, description: 更新时间 }
+        wechat_bind: { type: boolean, description: 是否绑定微信 }
+        can_unbind_wechat: { type: boolean, description: 是否允许解绑微信 }
+        has_password: { type: boolean, description: 是否已设置密码 }
+    MobileUser:
+      type: object
+      properties:
+        mobile: { type: string, description: 手机号 }
+        user_id: { type: integer, format: int64, description: 用户 ID }
+    WechatUser:
+      type: object
+      properties:
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        union_id: { type: string, description: 微信 UnionID }
+    AppUser:
+      type: object
+      properties:
+        open_id: { type: string, description: 应用 OpenID }
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        app_code: { type: integer, format: int32, description: 应用编码 }
+    WechatQrCodeRespData:
+      type: object
+      properties:
+        expire_in: { type: integer, format: int64, description: 有效期秒数 }
+        scene_token: { type: string, description: 场景令牌 }
+        qrcode_url: { type: string, description: 二维码 URL }
+    WechatQrCodeStatusRespData:
+      type: object
+      properties:
+        state: { type: string, description: 扫码状态 }
+        purpose: { type: string, description: 二维码用途 }
+        message: { type: string, description: 状态消息 }
+        token: { type: string, description: 登录成功 token }
+        user_info: { $ref: '#/components/schemas/UserInfoDto' }
+        bind_exist: { type: boolean, description: 是否已存在绑定关系 }
+    ChangePasswordRespData:
+      type: object
+      properties:
+        relogin_required: { type: boolean, description: 是否需要重新登录 }
+    CourseDto:
+      type: object
+      properties:
+        create_name: { type: string, description: 创建人名称 }
+        update_name: { type: string, description: 更新人名称 }
+        id: { type: integer, format: int64, description: 课程 ID }
+        name: { type: string, description: 课程名称 }
+        course_price: { type: integer, format: int64, description: 课程价格，单位分 }
+        service_time: { type: integer, format: int32, description: 服务时长 }
+        learn_time: { type: integer, format: int32, description: 可学习时长 }
+        sort: { type: integer, format: int32, description: 排序值 }
+        status: { type: integer, format: int32, description: 课程状态 }
+        features: { type: array, items: { type: string }, description: 课程特色 }
+        update_status: { type: integer, format: int32, description: 更新状态 }
+        has_purchased: { type: boolean, description: 当前用户是否已购买 }
+        cover_key: { type: string, description: 封面文件 key }
+        cover_url: { type: string, description: 封面 URL }
+        detail_cover_key: { type: string, description: 详情封面 key }
+        detail_cover_url: { type: string, description: 详情封面 URL }
+        detail: { type: string, description: 课程详情 }
+        create_by: { type: integer, format: int64, description: 创建人 ID }
+        update_by: { type: integer, format: int64, description: 更新人 ID }
+        create_at: { type: integer, format: int64, description: 创建时间 }
+        update_at: { type: integer, format: int64, description: 更新时间 }
+    CourseListRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            list: { type: array, items: { $ref: '#/components/schemas/CourseDto' }, description: 课程列表 }
+            total: { type: integer, format: int64, description: 总数 }
+    PurchasedCourseDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 课程 ID }
+        name: { type: string, description: 课程名称 }
+        service_expire_time: { type: integer, format: int64, description: 服务过期时间 }
+        learn_expire_time: { type: integer, format: int64, description: 学习过期时间 }
+        features: { type: array, items: { type: string }, description: 课程特色 }
+        update_status: { type: integer, format: int32, description: 更新状态 }
+        has_purchased: { type: boolean, description: 是否已购买 }
+        cover_key: { type: string, description: 封面 key }
+        cover_url: { type: string, description: 封面 URL }
+        detail_cover_key: { type: string, description: 详情封面 key }
+        detail_cover_url: { type: string, description: 详情封面 URL }
+        detail: { type: string, description: 详情 }
+    PurchasedCourseListRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            list: { type: array, items: { $ref: '#/components/schemas/PurchasedCourseDto' }, description: 已购买课程列表 }
+            total: { type: integer, format: int64, description: 总数 }
+    CourseDetailDto:
+      allOf:
+        - $ref: '#/components/schemas/CourseDto'
+        - $ref: '#/components/schemas/CatalogInfoRespData'
+    CatalogInfoRespData:
+      type: object
+      properties:
+        total_duration: { type: integer, format: int64, description: 课时总时长 }
+        lesson_count: { type: integer, format: int64, description: 课时数量 }
+        catalogs: { type: array, items: { $ref: '#/components/schemas/CatalogDto' }, description: 目录列表 }
+    CatalogDto:
+      type: object
+      properties:
+        course_id: { type: integer, format: int64, description: 课程 ID }
+        id: { type: integer, format: int64, description: 目录 ID }
+        name: { type: string, description: 目录名称 }
+        sort: { type: integer, format: int32, description: 排序值 }
+        parent_id: { type: integer, format: int64, description: 父目录 ID }
+        level: { type: integer, format: int32, description: 目录层级 }
+        lessons: { type: array, items: { $ref: '#/components/schemas/CatalogLessonDto' }, description: 目录下课时 }
+        lesson_count: { type: integer, format: int64, description: 课时数量 }
+    CatalogLessonDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 目录课时关联 ID }
+        lesson_id: { type: integer, format: int64, description: 课时 ID }
+        index: { type: integer, description: 课时序号 }
+        name: { type: string, description: 目录内展示名称 }
+        lesson_name: { type: string, description: 原课时名称 }
+        detail: { type: string, description: 课时详情 }
+        video_url: { type: string, description: 视频 URL }
+        video_file_name: { type: string, description: 视频文件名 }
+        duration: { type: integer, format: int32, description: 时长，单位秒 }
+        status: { type: integer, format: int32, description: 状态 }
+        show_time: { type: integer, format: int64, description: 展示时间点 }
+        enable_trial: { type: integer, format: int32, description: 是否允许试看 }
+    LessonDto:
+      type: object
+      properties:
+        create_name: { type: string, description: 创建人名称 }
+        update_name: { type: string, description: 更新人名称 }
+        id: { type: integer, format: int64, description: 课时 ID }
+        name: { type: string, description: 课时名称 }
+        detail: { type: string, description: 课时详情 }
+        category_id: { type: integer, format: int64, description: 分类 ID }
+        category_name: { type: string, description: 分类名称 }
+        video_key: { type: string, description: 视频文件 key }
+        video_url: { type: string, description: 视频 URL }
+        video_file_name: { type: string, description: 视频文件名 }
+        attachments: { type: array, items: { $ref: '#/components/schemas/Attachment' }, description: 附件列表 }
+        duration: { type: integer, format: int32, description: 时长，单位秒 }
+        chapters: { type: array, items: { $ref: '#/components/schemas/LessonChapter' }, description: 章节列表 }
+        status: { type: integer, format: int32, description: 状态 }
+        create_by: { type: integer, format: int64, description: 创建人 ID }
+        update_by: { type: integer, format: int64, description: 更新人 ID }
+        create_at: { type: integer, format: int64, description: 创建时间 }
+        update_at: { type: integer, format: int64, description: 更新时间 }
+    Attachment:
+      type: object
+      properties:
+        origin_name: { type: string, description: 原始文件名 }
+        file_key: { type: string, description: 文件 key }
+        file_url: { type: string, description: 文件 URL }
+    LessonChapter:
+      type: object
+      properties:
+        id: { type: string, description: 章节 ID }
+        name: { type: string, description: 章节名称 }
+        begin_position: { type: integer, format: int64, description: 开始播放位置 }
+        end_position: { type: integer, format: int64, description: 结束播放位置 }
+    LessonLearnInfoRespData:
+      type: object
+      properties:
+        course_id: { type: integer, format: int64, description: 课程 ID }
+        lesson_id: { type: integer, format: int64, description: 课时 ID }
+        play_position: { type: integer, format: int64, description: 播放位置 }
+        learn_status: { type: integer, format: int32, description: 学习状态 }
+        last_type: { type: integer, format: int32, description: 最近一次上报类型 }
+        entry_time: { type: integer, format: int64, description: 进入学习时间 }
+        last_report_time: { type: integer, format: int64, description: 最近上报时间 }
+        in_learning: { type: boolean, description: 是否学习中 }
+    ContinueLearnRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            list: { type: array, items: { $ref: '#/components/schemas/ContinueLearnCourseDto' }, description: 继续学习课程列表 }
+            total: { type: integer, format: int64, description: 总数 }
+    ContinueLearnCourseDto:
+      type: object
+      properties:
+        course_id: { type: integer, format: int64, description: 课程 ID }
+        course_name: { type: string, description: 课程名称 }
+        course_cover_key: { type: string, description: 课程封面 key }
+        course_cover_url: { type: string, description: 课程封面 URL }
+        lesson_id: { type: integer, format: int64, description: 课时 ID }
+        lesson_name: { type: string, description: 课时名称 }
+        lesson_index: { type: integer, description: 课时序号 }
+        lesson_count: { type: integer, format: int64, description: 课时总数 }
+        play_position: { type: integer, format: int64, description: 播放位置 }
+        learn_status: { type: integer, format: int32, description: 学习状态 }
+        last_learn_time: { type: integer, format: int64, description: 最近学习时间 }
+    ListGoodsRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            total: { type: integer, format: int64, description: 总数 }
+            list: { type: array, items: { $ref: '#/components/schemas/CartGoodsDto' }, description: 购物车商品列表 }
+    CartGoodsDto:
+      allOf:
+        - $ref: '#/components/schemas/CourseDto'
+        - type: object
+          properties:
+            cart_id: { type: integer, format: int64, description: 购物车记录 ID }
+            goods_id: { type: integer, format: int64, description: 商品 ID }
+            quantity: { type: integer, format: int32, description: 商品数量 }
+    OrderCalcFeeRespData:
+      type: object
+      properties:
+        fee_uuid: { type: string, description: 本次计费唯一标识 }
+        total_fee: { type: integer, format: int64, description: 订单总价，单位分 }
+        total_discount_fee: { type: integer, format: int64, description: 总优惠金额，单位分 }
+        total_pay_fee: { type: integer, format: int64, description: 应支付金额，单位分 }
+        expire_time: { type: integer, format: int64, description: 计费结果过期时间 }
+        course_fees: { type: array, items: { $ref: '#/components/schemas/CourseFeeDto' }, description: 课程价格明细 }
+    CourseFeeDto:
+      type: object
+      properties:
+        course_id: { type: integer, format: int64, description: 课程 ID }
+        price: { type: integer, format: int64, description: 原价，单位分 }
+        discount_fee: { type: integer, format: int64, description: 优惠金额，单位分 }
+        pay_fee: { type: integer, format: int64, description: 实付金额，单位分 }
+        goods_snap: { type: object, description: 商品快照 }
+    OrderPayNowRespData:
+      type: object
+      properties:
+        order_id: { type: integer, format: int64, description: 订单 ID }
+        appId: { type: string, description: 微信支付 appId }
+        timeStamp: { type: string, description: 微信支付时间戳 }
+        nonceStr: { type: string, description: 微信支付随机串 }
+        package: { type: string, description: 微信支付 package }
+        signType: { type: string, description: 签名类型 }
+        paySign: { type: string, description: 支付签名 }
+        code_url: { type: string, description: Native 支付二维码 URL }
+        trade_type: { type: string, description: 微信交易类型 }
+    UserOrderListRespData:
+      allOf:
+        - $ref: '#/components/schemas/Pager'
+        - type: object
+          properties:
+            total: { type: integer, format: int64, description: 总数 }
+            list: { type: array, items: { $ref: '#/components/schemas/OrderInfoRespData' }, description: 订单列表 }
+    OrderInfoRespData:
+      allOf:
+        - $ref: '#/components/schemas/OrderDto'
+        - type: object
+          properties:
+            items: { type: array, items: { $ref: '#/components/schemas/OrderItemDto' }, description: 订单商品明细 }
+            refunds: { type: array, items: { $ref: '#/components/schemas/RefundDto' }, description: 退款记录 }
+    OrderDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 订单 ID }
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        status: { type: integer, format: int32, description: 订单状态：-1 已取消，1 待支付，2 已支付，3 已退款，4 已发货，5 已签收，6 已完成 }
+        order_source: { type: integer, format: int32, description: 订单来源：1 用户下单，2 管理后台，3 系统赠送 }
+        order_amount: { type: integer, format: int64, description: 订单金额，单位分 }
+        discount_amount: { type: integer, format: int64, description: 优惠金额，单位分 }
+        payment_amount: { type: integer, format: int64, description: 实付金额，单位分 }
+        trade_no: { type: string, description: 支付平台订单号 }
+        inner_trade_no: { type: string, description: 内部支付订单号 }
+        order_desc: { type: string, description: 订单描述 }
+        payment_at: { type: integer, format: int64, description: 支付时间，毫秒时间戳 }
+        user_remark: { type: string, description: 用户备注 }
+        receiver_confirm_at: { type: integer, format: int64, description: 确认收货时间 }
+        receiver_confirm_type: { type: integer, format: int32, description: 确认收货方式 }
+        refund_amount: { type: integer, format: int64, description: 累计退款金额，单位分 }
+        refund_at: { type: integer, format: int64, description: 最近退款完成时间 }
+        cancel_at: { type: integer, format: int64, description: 取消时间 }
+        cancel_type: { type: integer, format: int32, description: 取消类型：1 用户取消，2 客服取消，3 超时取消 }
+        cancel_by: { type: integer, format: int64, description: 取消人 ID }
+        cancel_reason: { type: string, description: 取消理由 }
+        create_at: { type: integer, format: int64, description: 创建时间 }
+        create_by: { type: integer, format: int64, description: 创建人 ID }
+        cancel_name: { type: string, description: 取消人名称 }
+        create_name: { type: string, description: 创建人名称 }
+        user_name: { type: string, description: 用户昵称 }
+        user_mobile: { type: string, description: 用户手机号 }
+    OrderItemDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 订单明细 ID }
+        order_id: { type: integer, format: int64, description: 订单 ID }
+        user_id: { type: integer, format: int64, description: 用户 ID }
+        goods_id: { type: integer, format: int64, description: 商品 ID }
+        goods_type: { type: integer, format: int32, description: 商品类型 }
+        quantity: { type: integer, format: int32, description: 商品数量 }
+        payment_amount: { type: integer, format: int64, description: 实付金额，单位分 }
+        discount_amount: { type: integer, format: int64, description: 优惠金额，单位分 }
+        goods_snap: { type: object, description: 商品快照 }
+        refund_status: { type: integer, format: int32, description: 退款状态：0 无退款，1 退款中，2 退款完成，3 退款异常 }
+    RefundDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64, description: 退款记录 ID }
+        amount: { type: integer, format: int64, description: 退款金额，单位分 }
+        item_ids: { type: array, items: { type: integer, format: int64 }, description: 退款明细 ID 列表 }
+        apply_at: { type: integer, format: int64, description: 申请时间 }
+        status: { type: integer, format: int32, description: 退款状态：0 无退款，1 退款中，2 退款完成，3 退款异常 }
+        done_at: { type: integer, format: int64, description: 完成时间 }
+        reason: { type: string, description: 退款原因 }
+        refund_id: { type: string, description: 第三方退款单号 }
+        apply_user_id: { type: integer, format: int64, description: 申请人 ID }
+        refund_name: { type: string, description: 申请人名称 }
+        items: { type: array, items: { $ref: '#/components/schemas/OrderItemDto' }, description: 退款商品明细 }
+    WechatNotifyRsp:
+      type: object
+      properties:
+        code: { type: string, description: 微信回调响应编码 }
+        message: { type: string, description: 微信回调响应消息 }

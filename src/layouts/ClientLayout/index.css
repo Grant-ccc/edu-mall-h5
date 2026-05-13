@@ -1,0 +1,161 @@
+/* C端页面布局样式 */
+
+.client-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部导航 */
+.client-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.client-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Logo */
+.client-logo {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.client-logo:hover {
+  color: var(--primary-color-hover);
+}
+
+/* 导航 */
+.client-nav {
+  display: flex;
+  gap: 32px;
+}
+
+.client-nav-item {
+  font-size: 15px;
+  color: var(--text-color-secondary);
+  text-decoration: none;
+  padding: 20px 0;
+  position: relative;
+}
+
+.client-nav-item:hover,
+.client-nav-item.active {
+  color: var(--primary-color);
+}
+
+.client-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-color);
+}
+
+/* 右侧区域 */
+.client-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+/* 搜索框 */
+.client-search {
+  width: 200px;
+}
+
+.client-search .ant-input {
+  border-radius: 20px;
+}
+
+/* 购物车按钮 */
+.client-cart-btn {
+  color: var(--text-color-secondary);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.client-cart-btn:hover {
+  color: var(--primary-color);
+}
+
+/* 用户头像 */
+.client-user-avatar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.client-user-avatar:hover {
+  background: #f5f5f5;
+}
+
+.client-user-name {
+  font-size: 14px;
+  color: var(--text-color);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 登录按钮 */
+.client-login-btn {
+  padding: 6px 16px;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  color: var(--primary-color);
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.client-login-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+/* 内容区域 */
+.client-main {
+  flex: 1;
+  background: #f5f5f5;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .client-header-inner {
+    padding: 0 16px;
+  }
+
+  .client-nav {
+    display: none;
+  }
+
+  .client-search {
+    width: 150px;
+  }
+
+  .client-user-name {
+    display: none;
+  }
+}

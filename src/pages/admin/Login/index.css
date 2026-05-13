@@ -1,0 +1,54 @@
+/* 管理端登录页样式 */
+
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.admin-login-container {
+  width: 400px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.admin-login-header h1 {
+  margin: 0 0 8px;
+  color: #1890ff;
+  font-size: 28px;
+}
+
+.admin-login-header p {
+  margin: 0;
+  color: #999;
+  font-size: 14px;
+}
+
+.admin-login-tabs .ant-tabs-nav {
+  margin-bottom: 24px;
+}
+
+.admin-login-tip {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  margin-top: 16px;
+}
+
+.admin-login-footer {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}

@@ -1,0 +1,108 @@
+/* 支付页样式 */
+
+.payment-page {
+  min-height: calc(100vh - 64px);
+  padding: 24px 0;
+  background: #f5f5f5;
+}
+
+.payment-loading {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.payment-container h2 {
+  margin-bottom: 16px;
+}
+
+.payment-order-card,
+.payment-goods-card,
+.payment-method-card,
+.payment-qrcode-card {
+  margin-bottom: 16px;
+}
+
+.payment-order-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.payment-order-row:last-child {
+  margin-bottom: 0;
+}
+
+.payment-order-row .label {
+  color: #999;
+}
+
+.payment-order-row .value {
+  font-weight: 500;
+}
+
+.payment-order-row .value.price {
+  font-size: 18px;
+  color: #ff4d4f;
+}
+
+.payment-goods-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.payment-goods-item:last-child {
+  border-bottom: none;
+}
+
+.payment-goods-item .goods-name {
+  font-size: 14px;
+}
+
+.payment-goods-item .goods-price {
+  font-weight: 500;
+  color: #ff4d4f;
+}
+
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.payment-qrcode {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.qrcode-tip {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.payment-demo {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px dashed #e8e8e8;
+}
+
+.demo-tip {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
+}

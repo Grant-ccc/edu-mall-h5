@@ -1,0 +1,22 @@
+/* 修改密码弹窗样式 */
+
+.change-password-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.change-password-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.change-password-form .ant-input-affix-wrapper {
+  height: 40px;
+}
+
+.change-password-tip {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+}

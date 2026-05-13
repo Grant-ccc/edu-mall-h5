@@ -1,0 +1,205 @@
+/* 登录页面样式 */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 左侧展示区域 */
+.login-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  color: #fff;
+}
+
+.login-left h1 {
+  font-size: 48px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.login-left p {
+  font-size: 18px;
+  opacity: 0.9;
+  margin-bottom: 40px;
+}
+
+.login-features {
+  display: flex;
+  gap: 24px;
+}
+
+.login-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.login-feature-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 右侧登录卡片 */
+.login-right {
+  width: 480px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.login-card-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Tab 样式 */
+.login-tabs .ant-tabs-nav {
+  margin-bottom: 24px;
+}
+
+.login-tabs .ant-tabs-tab {
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+/* 表单样式 */
+.login-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.login-form .ant-input-affix-wrapper {
+  height: 40px;
+}
+
+.login-form .ant-input {
+  height: 38px;
+}
+
+/* 滑块验证码 */
+.slider-captcha {
+  margin-bottom: 16px;
+}
+
+/* 忘记密码链接 */
+.forgot-password-link {
+  display: block;
+  text-align: right;
+  margin-bottom: 16px;
+  color: #1890ff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.forgot-password-link:hover {
+  color: #40a9ff;
+}
+
+/* 登录按钮 */
+.login-btn {
+  width: 100%;
+  height: 40px;
+  font-size: 16px;
+}
+
+/* 获取验证码按钮 */
+.sms-btn {
+  height: 40px;
+  min-width: 100px;
+}
+
+/* 微信扫码区域 */
+.wechat-qrcode-section {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.wechat-qrcode-section img {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 16px;
+}
+
+.wechat-qrcode-tip {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.wechat-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.wechat-status.success {
+  color: #52c41a;
+}
+
+.wechat-status.waiting {
+  color: #faad14;
+}
+
+/* 模拟按钮（演示用） */
+.demo-btn {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #999;
+}
+
+/* 响应式：移动端 */
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .login-left {
+    padding: 40px 20px;
+  }
+
+  .login-left h1 {
+    font-size: 32px;
+  }
+
+  .login-left p {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .login-features {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .login-right {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .login-card {
+    max-width: 100%;
+  }
+}

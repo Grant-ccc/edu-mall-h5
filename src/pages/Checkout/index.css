@@ -1,0 +1,87 @@
+/* 确认订单页样式 */
+
+.checkout-page {
+  min-height: calc(100vh - 64px);
+  padding: 24px 0;
+}
+
+.checkout-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.checkout-container h2 {
+  margin-bottom: 24px;
+}
+
+.checkout-empty-card {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.checkout-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.checkout-goods-card .checkout-goods-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-goods-card .goods-name {
+  font-size: 15px;
+}
+
+.checkout-goods-card .goods-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ff4d4f;
+}
+
+.checkout-goods-card .ant-divider {
+  margin: 12px 0;
+}
+
+.checkout-summary-card .ant-card-body {
+  padding: 24px;
+}
+
+.checkout-summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.checkout-summary-row.total {
+  margin-bottom: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 16px;
+  color: #333;
+}
+
+.checkout-summary-row .total-price {
+  font-size: 24px;
+  font-weight: 600;
+  color: #ff4d4f;
+}
+
+.checkout-tip {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .checkout-container {
+    padding: 0 16px;
+  }
+}

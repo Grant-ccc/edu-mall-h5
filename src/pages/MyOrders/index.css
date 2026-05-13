@@ -1,0 +1,140 @@
+/* 我的订单页样式 */
+
+.my-orders-page {
+  min-height: calc(100vh - 64px);
+  padding: 24px 0;
+}
+
+.my-orders-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.my-orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.my-orders-header h2 {
+  margin: 0;
+}
+
+/* 订单卡片 */
+.order-card {
+  margin-bottom: 16px;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 12px;
+}
+
+.order-card-no {
+  font-size: 14px;
+  color: #666;
+}
+
+.order-card-time {
+  font-size: 12px;
+  color: #999;
+  margin-left: 16px;
+}
+
+.order-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-goods-list {
+  flex: 1;
+}
+
+.order-goods-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.order-goods-cover {
+  width: 80px;
+  height: 45px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #999;
+}
+
+.order-goods-info {
+  flex: 1;
+}
+
+.order-goods-name {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.order-goods-price {
+  font-size: 14px;
+  color: #ff4d4f;
+}
+
+.order-card-summary {
+  text-align: right;
+  min-width: 150px;
+}
+
+.order-total-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.order-total-amount {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ff4d4f;
+}
+
+.order-card-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* 空状态 */
+.orders-empty {
+  text-align: center;
+  padding: 60px 0;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .my-orders-container {
+    padding: 0 16px;
+  }
+
+  .order-card-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .order-card-summary {
+    text-align: left;
+    margin-top: 12px;
+    width: 100%;
+  }
+}
