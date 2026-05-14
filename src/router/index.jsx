@@ -1,21 +1,21 @@
 import { createBrowserRouter } from 'react-router-dom'
 
 // C端页面
-import Login from '../pages/Login'
-import CourseList from '../pages/CourseList'
-import CourseDetail from '../pages/CourseDetail'
-import MyCourses from '../pages/MyCourses'
-import MyOrders from '../pages/MyOrders'
-import OrderDetail from '../pages/OrderDetail'
-import Cart from '../pages/Cart'
-import Checkout from '../pages/Checkout'
-import Payment from '../pages/Payment'
-import PaymentSuccess from '../pages/PaymentSuccess'
-import AccountSettings from '../pages/AccountSettings'
+import Login from '../client/pages/Login'
+import CourseList from '../client/pages/CourseList'
+import CourseDetail from '../client/pages/CourseDetail'
+import MyCourses from '../client/pages/MyCourses'
+import MyOrders from '../client/pages/MyOrders'
+import OrderDetail from '../client/pages/OrderDetail'
+import Cart from '../client/pages/Cart'
+import Checkout from '../client/pages/Checkout'
+import Payment from '../client/pages/Payment'
+import PaymentSuccess from '../client/pages/PaymentSuccess'
+import AccountSettings from '../client/pages/AccountSettings'
 
 // 管理端页面
-import AdminLogin from '../pages/admin/Login'
-import AdminDashboard from '../pages/admin/Dashboard'
+import AdminLogin from '../admin/pages/Login'
+import AdminDashboard from '../admin/pages/Dashboard'
 
 const router = createBrowserRouter([
   // ========== C端路由 ==========

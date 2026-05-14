@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Form, Input, Button, Tabs, message } from 'antd'
 import { MobileOutlined, LockOutlined, SafetyOutlined } from '@ant-design/icons'
-import adminAuthStore from '../../../stores/adminAuthStore'
-import SliderCaptcha from '../../../components/SliderCaptcha'
+import adminAuthStore from '../../stores/adminAuthStore'
+import SliderCaptcha from '../../../shared/components/SliderCaptcha'
 import './index.css'
 
 function AdminLogin() {

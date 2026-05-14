@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Tabs, Form, Input, Button, message } from 'antd'
 import { MobileOutlined, LockOutlined, SafetyOutlined } from '@ant-design/icons'
-import SliderCaptcha from '../../components/SliderCaptcha'
-import WechatQrCode from '../../components/WechatQrCode'
+import SliderCaptcha from '../../../shared/components/SliderCaptcha'
+import WechatQrCode from '../../../shared/components/WechatQrCode'
 import authStore from '../../stores/authStore'
-import '../../styles/login.css'
+import '../../../shared/styles/login.css'
 
 const { TabPane } = Tabs
 

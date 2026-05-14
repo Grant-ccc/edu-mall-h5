@@ -5,7 +5,7 @@ import {
   DollarOutlined,
   BookOutlined
 } from '@ant-design/icons'
-import AdminLayout from '../../../layouts/AdminLayout'
+import AdminLayout from '../../layouts/AdminLayout'
 
 // Mock 统计数据
 const mockStats = {

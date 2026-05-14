@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Modal, Form, Input, Button, message } from 'antd'
 import { LockOutlined, SafetyOutlined } from '@ant-design/icons'
-import SliderCaptcha from '../SliderCaptcha'
+import SliderCaptcha from '../../../shared/components/SliderCaptcha'
 import authStore from '../../stores/authStore'
 import './index.css'
 
