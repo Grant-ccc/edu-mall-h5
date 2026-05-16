@@ -1,0 +1,105 @@
+.course-catalog-page {
+  padding: 24px;
+}
+
+.catalog-header-card {
+  margin-bottom: 16px;
+}
+
+.catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.catalog-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+}
+
+.catalog-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.catalog-content {
+  display: flex;
+  gap: 16px;
+  min-height: 500px;
+}
+
+.catalog-tree-card {
+  flex: 0 0 300px;
+}
+
+.catalog-lesson-card {
+  flex: 1;
+}
+
+.catalog-tree {
+  .catalog-tree-node {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+
+    .catalog-lesson-count {
+      color: #999;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    .catalog-actions {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    &:hover .catalog-actions {
+      opacity: 1;
+    }
+  }
+
+  .ant-tree-node-content-wrapper {
+    width: 100%;
+  }
+}
+
+.lesson-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lesson-select-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+
+  &:hover {
+    background: #e6f7ff;
+  }
+
+  .lesson-info {
+    display: flex;
+    align-items: center;
+
+    .lesson-name {
+      font-weight: 500;
+    }
+
+    .lesson-duration {
+      color: #999;
+      font-size: 12px;
+      margin-left: 12px;
+    }
+  }
+}

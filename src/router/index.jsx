@@ -16,6 +16,9 @@ import AccountSettings from '../client/pages/AccountSettings'
 // 管理端页面
 import AdminLogin from '../admin/pages/Login'
 import AdminDashboard from '../admin/pages/Dashboard'
+import AdminCourseList from '../admin/pages/CourseList'
+import AdminCourseForm from '../admin/pages/CourseForm'
+import AdminCourseCatalog from '../admin/pages/CourseCatalog'
 
 const router = createBrowserRouter([
   // ========== C端路由 ==========
@@ -80,6 +83,23 @@ const router = createBrowserRouter([
   {
     path: '/admin/dashboard',
     element: <AdminDashboard />
+  },
+  // 课程管理
+  {
+    path: '/admin/courses',
+    element: <AdminCourseList />
+  },
+  {
+    path: '/admin/courses/create',
+    element: <AdminCourseForm />
+  },
+  {
+    path: '/admin/courses/:id/edit',
+    element: <AdminCourseForm />
+  },
+  {
+    path: '/admin/courses/:id/catalog',
+    element: <AdminCourseCatalog />
   }
 ])
 

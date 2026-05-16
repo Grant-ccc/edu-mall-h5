@@ -1,0 +1,35 @@
+.course-list-page {
+  padding: 24px;
+}
+
+.course-list-card {
+  .ant-card-body {
+    padding: 16px;
+  }
+}
+
+.course-filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.course-cover-placeholder {
+  width: 60px;
+  height: 40px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 表格操作按钮 */
+.ant-table-cell {
+  .ant-btn-link {
+    padding: 0 8px;
+  }
+}

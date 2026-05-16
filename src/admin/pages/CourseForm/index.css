@@ -1,0 +1,80 @@
+.course-form-page {
+  padding: 24px;
+}
+
+.course-form-card {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.course-form {
+  .form-section {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #333;
+  }
+}
+
+.features-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.feature-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: #f0f5ff;
+  border: 1px solid #adc6ff;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #1890ff;
+  gap: 8px;
+
+  a {
+    color: #1890ff;
+    cursor: pointer;
+    font-size: 12px;
+
+    &:hover {
+      color: #40a9ff;
+    }
+  }
+}
+
+.form-actions {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+
+  .ant-form-item-control-input {
+    justify-content: flex-start;
+  }
+}
+
+/* 上传组件样式 */
+.ant-upload-picture-card-wrapper {
+  .ant-upload-list-picture-card-container {
+    width: 120px;
+    height: 120px;
+  }
+}
