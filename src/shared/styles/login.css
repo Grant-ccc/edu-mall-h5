@@ -1,205 +1,170 @@
-/* 登录页面样式 */
+/* 登录页面 — 居中卡片设计，照搬 login(1).html */
 
-.login-page {
+.login-page-new {
   min-height: 100vh;
   display: flex;
+  justify-content: center;
+  align-items: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
 }
 
-/* 左侧展示区域 */
-.login-left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 60px;
-  color: #fff;
-}
-
-.login-left h1 {
-  font-size: 48px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #fff;
-}
-
-.login-left p {
-  font-size: 18px;
-  opacity: 0.9;
-  margin-bottom: 40px;
-}
-
-.login-features {
-  display: flex;
-  gap: 24px;
-}
-
-.login-feature-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.login-feature-item svg {
-  width: 20px;
-  height: 20px;
-}
-
-/* 右侧登录卡片 */
-.login-right {
-  width: 480px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-}
-
+/* ====== 卡片 ====== */
 .login-card {
-  width: 100%;
-  max-width: 400px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-}
-
-.login-card-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 24px;
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   text-align: center;
+  max-width: 400px;
+  width: 100%;
 }
 
-/* Tab 样式 */
-.login-tabs .ant-tabs-nav {
-  margin-bottom: 24px;
+.login-logo {
+  font-size: 48px;
+  margin-bottom: 20px;
 }
 
-.login-tabs .ant-tabs-tab {
+.login-card h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.login-subtitle {
+  color: #666;
   font-size: 14px;
-  padding: 8px 16px;
+  margin-bottom: 30px;
 }
 
-/* 表单样式 */
-.login-form .ant-form-item {
-  margin-bottom: 16px;
+/* ====== 按钮 ====== */
+.login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+  margin-top: 12px;
 }
 
-.login-form .ant-input-affix-wrapper {
-  height: 40px;
+.login-btn-primary {
+  background: #3370ff;
+  color: white;
+}
+.login-btn-primary:hover {
+  background: #2855f0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(51, 112, 255, 0.3);
+}
+.login-btn-primary:disabled {
+  background: #bfbfbf;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.login-form .ant-input {
-  height: 38px;
+.login-btn-secondary {
+  background: #f5f5f5;
+  color: #333;
+}
+.login-btn-secondary:hover {
+  background: #e8e8e8;
 }
 
-/* 滑块验证码 */
-.slider-captcha {
-  margin-bottom: 16px;
-}
-
-/* 忘记密码链接 */
-.forgot-password-link {
-  display: block;
-  text-align: right;
-  margin-bottom: 16px;
-  color: #1890ff;
+.login-btn-back {
+  background: transparent;
+  color: #666;
+  margin-top: 16px;
   font-size: 14px;
+  border: none;
   cursor: pointer;
 }
-
-.forgot-password-link:hover {
-  color: #40a9ff;
+.login-btn-back:hover {
+  color: #333;
 }
 
-/* 登录按钮 */
-.login-btn {
+/* ====== 表单 ====== */
+.login-form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.login-form-group label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.login-form-group input {
   width: 100%;
-  height: 40px;
+  padding: 12px 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
   font-size: 16px;
+  transition: all 0.3s;
+  outline: none;
 }
 
-/* 获取验证码按钮 */
-.sms-btn {
-  height: 40px;
-  min-width: 100px;
+.login-form-group input:focus {
+  border-color: #3370ff;
+  box-shadow: 0 0 0 3px rgba(51, 112, 255, 0.1);
 }
 
-/* 微信扫码区域 */
-.wechat-qrcode-section {
-  text-align: center;
-  padding: 20px 0;
+.login-form-group input::placeholder {
+  color: #bfbfbf;
 }
 
-.wechat-qrcode-section img {
-  width: 200px;
-  height: 200px;
-  margin-bottom: 16px;
-}
-
-.wechat-qrcode-tip {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 16px;
-}
-
-.wechat-status {
+/* 输入行（input + button） */
+.login-input-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.login-input-row input {
+  flex: 1;
+}
+
+.login-btn-code {
+  width: 120px;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
   font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.login-btn-code:hover:not(:disabled) {
+  background: #e8e8e8;
+}
+.login-btn-code:disabled {
+  color: #bfbfbf;
+  cursor: not-allowed;
 }
 
-.wechat-status.success {
-  color: #52c41a;
+/* 文字链接 */
+.login-link {
+  background: transparent;
+  border: none;
+  color: #3370ff;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  margin-top: 10px;
+  display: inline-block;
 }
-
-.wechat-status.waiting {
-  color: #faad14;
-}
-
-/* 模拟按钮（演示用） */
-.demo-btn {
-  margin-top: 16px;
-  font-size: 12px;
-  color: #999;
-}
-
-/* 响应式：移动端 */
-@media (max-width: 768px) {
-  .login-page {
-    flex-direction: column;
-  }
-
-  .login-left {
-    padding: 40px 20px;
-  }
-
-  .login-left h1 {
-    font-size: 32px;
-  }
-
-  .login-left p {
-    font-size: 14px;
-    margin-bottom: 20px;
-  }
-
-  .login-features {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .login-right {
-    width: 100%;
-    padding: 20px;
-  }
-
-  .login-card {
-    max-width: 100%;
-  }
+.login-link:hover {
+  color: #2855f0;
+  text-decoration: underline;
 }

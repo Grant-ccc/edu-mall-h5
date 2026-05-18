@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Checkbox, Button, Empty, Popconfirm, message, Image } from 'antd'
+import { Card, Checkbox, Button, Empty, Popconfirm, message, Image, Spin } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import ClientLayout from '../../layouts/ClientLayout'
 import cartStore from '../../stores/cartStore'
@@ -11,6 +11,7 @@ function Cart() {
   const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [selectedIds, setSelectedIds] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!authStore.isLogin()) {
@@ -18,14 +19,21 @@ function Cart() {
       return
     }
 
-    // 订阅购物车状态变化
-    const state = cartStore.getState()
-    setItems(state.items)
-    setSelectedIds(state.items.map(item => item.cart_id))
+    // 加载购物车列表
+    setLoading(true)
+    cartStore.fetchCartList()
+      .then(() => {
+        const state = cartStore.getState()
+        setItems(state.items)
+        setSelectedIds(state.items.map(item => item.cart_id))
+      })
+      .catch(() => {
+        message.error('加载购物车失败')
+      })
+      .finally(() => setLoading(false))
 
     const unsubscribe = cartStore.subscribe((newState) => {
       setItems(newState.items)
-      // 如果新列表比选中列表少，更新选中列表
       const newItemIds = newState.items.map(item => item.cart_id)
       setSelectedIds(prev => prev.filter(id => newItemIds.includes(id)))
     })
@@ -59,24 +67,26 @@ function Cart() {
   }
 
   // 删除商品
-  const handleRemoveItem = (cartId) => {
-    cartStore.removeItem(cartId)
-    message.success('已移除')
+  const handleRemoveItem = async (cartId) => {
+    const result = await cartStore.removeItem(cartId)
+    if (result.success) {
+      message.success('已移除')
+    }
   }
 
   // 批量删除
-  const handleRemoveSelected = () => {
+  const handleRemoveSelected = async () => {
     if (selectedIds.length === 0) {
       message.warning('请先选择要删除的商品')
       return
     }
-    cartStore.removeItems(selectedIds)
+    await cartStore.removeItems(selectedIds)
     message.success('已移除选中商品')
   }
 
   // 清空购物车
-  const handleClearCart = () => {
-    cartStore.clearCart()
+  const handleClearCart = async () => {
+    await cartStore.clearCart()
     message.success('购物车已清空')
   }
 

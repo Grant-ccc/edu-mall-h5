@@ -1,36 +1,78 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { getWechatQrCode, getWechatQrCodeStatus } from '../../../client/api/auth'
 import './index.css'
 
 /**
- * 微信扫码登录组件（演示版）
- * 展示二维码并模拟扫码状态变化
+ * 微信扫码登录组件
+ * 从 API 获取二维码，轮询扫码状态
  */
 function WechatQrCode({ onSuccess }) {
   // 状态：waiting(等待扫码) -> scanned(已扫码待确认) -> success(登录成功)
   const [status, setStatus] = useState('waiting')
   const [qrcodeUrl, setQrcodeUrl] = useState('')
-  const [countdown, setCountdown] = useState(120) // 二维码有效期
+  const [countdown, setCountdown] = useState(120)
+  const [sceneToken, setSceneToken] = useState(null)
+  const pollingRef = useRef(null)
 
-  // 生成演示二维码
+  // 获取二维码
   useEffect(() => {
-    // 使用占位二维码图片
-    setQrcodeUrl('data:image/svg+xml;base64,' + btoa(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
-        <rect fill="#fff" width="200" height="200"/>
-        <text x="100" y="90" text-anchor="middle" fill="#333" font-size="14">微信扫码登录</text>
-        <text x="100" y="110" text-anchor="middle" fill="#999" font-size="12">(演示二维码)</text>
-        <rect x="20" y="20" width="40" height="40" fill="#333"/>
-        <rect x="140" y="20" width="40" height="40" fill="#333"/>
-        <rect x="20" y="140" width="40" height="40" fill="#333"/>
-        <rect x="28" y="28" width="24" height="24" fill="#fff"/>
-        <rect x="148" y="28" width="24" height="24" fill="#fff"/>
-        <rect x="28" y="148" width="24" height="24" fill="#fff"/>
-        <rect x="36" y="36" width="8" height="8" fill="#333"/>
-        <rect x="156" y="36" width="8" height="8" fill="#333"/>
-        <rect x="36" y="156" width="8" height="8" fill="#333"/>
-      </svg>
-    `))
+    fetchQrCode()
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current)
+    }
   }, [])
+
+  const fetchQrCode = async () => {
+    try {
+      const data = await getWechatQrCode('login')
+      setQrcodeUrl(data.qrcode_url)
+      setSceneToken(data.scene_token)
+      setCountdown(Math.floor(data.expire_in || 120))
+      setStatus('waiting')
+      // 开始轮询扫码状态
+      startPolling(data.scene_token)
+    } catch (error) {
+      console.error('获取微信二维码失败:', error)
+      // API 失败时使用占位二维码
+      setQrcodeUrl('data:image/svg+xml;base64,' + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+          <rect fill="#fff" width="200" height="200"/>
+          <text x="100" y="90" text-anchor="middle" fill="#333" font-size="14">微信扫码登录</text>
+          <text x="100" y="110" text-anchor="middle" fill="#999" font-size="12">(演示二维码)</text>
+          <rect x="20" y="20" width="40" height="40" fill="#333"/>
+          <rect x="140" y="20" width="40" height="40" fill="#333"/>
+          <rect x="20" y="140" width="40" height="40" fill="#333"/>
+          <rect x="28" y="28" width="24" height="24" fill="#fff"/>
+          <rect x="148" y="28" width="24" height="24" fill="#fff"/>
+          <rect x="28" y="148" width="24" height="24" fill="#fff"/>
+          <rect x="36" y="36" width="8" height="8" fill="#333"/>
+          <rect x="156" y="36" width="8" height="8" fill="#333"/>
+          <rect x="36" y="156" width="8" height="8" fill="#333"/>
+        </svg>
+      `))
+    }
+  }
+
+  // 开始轮询扫码状态
+  const startPolling = (token) => {
+    if (pollingRef.current) clearInterval(pollingRef.current)
+    pollingRef.current = setInterval(async () => {
+      try {
+        const data = await getWechatQrCodeStatus(token)
+        if (data.state === 'scanned') {
+          setStatus('scanned')
+        } else if (data.state === 'confirmed' || data.state === 'success') {
+          setStatus('success')
+          if (pollingRef.current) clearInterval(pollingRef.current)
+          if (onSuccess) {
+            onSuccess(data.token, data.user_info?.user || {})
+          }
+        }
+      } catch (error) {
+        console.error('查询扫码状态失败:', error)
+      }
+    }, 2000)
+  }
 
   // 二维码倒计时
   useEffect(() => {
@@ -39,33 +81,32 @@ function WechatQrCode({ onSuccess }) {
       return () => clearTimeout(timer)
     }
     if (countdown === 0) {
-      // 二维码过期，刷新
-      setCountdown(120)
+      // 二维码过期，重新获取
+      if (pollingRef.current) clearInterval(pollingRef.current)
+      fetchQrCode()
     }
   }, [status, countdown])
 
-  // 模拟扫码成功
+  // 模拟扫码成功（API 不可用时的 fallback）
   const simulateScanSuccess = () => {
     setStatus('scanned')
     setTimeout(() => {
       setStatus('success')
-      // 生成演示登录数据
-      const mockUser = {
-        user_id: 1001,
-        nick_name: '微信用户',
-        icon_url: '',
-        sex: 0
-      }
       if (onSuccess) {
-        onSuccess('mock_wechat_token_' + Date.now(), mockUser)
+        onSuccess('mock_wechat_token_' + Date.now(), {
+          user_id: 1001,
+          nick_name: '微信用户',
+          icon_url: '',
+          sex: 0
+        })
       }
     }, 1500)
   }
 
   // 刷新二维码
   const refreshQrCode = () => {
-    setStatus('waiting')
-    setCountdown(120)
+    if (pollingRef.current) clearInterval(pollingRef.current)
+    fetchQrCode()
   }
 
   return (

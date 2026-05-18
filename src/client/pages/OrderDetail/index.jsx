@@ -1,27 +1,38 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, Descriptions, Tag, Button, Timeline, Empty, Popconfirm, message } from 'antd'
+import { Card, Descriptions, Tag, Button, Timeline, Empty, Popconfirm, message, Spin } from 'antd'
 import ClientLayout from '../../layouts/ClientLayout'
-import orderStore, { OrderStatus, OrderStatusText, OrderStatusColor } from '../../stores/orderStore'
+import { getOrderInfo, cancelOrder } from '../../api/order'
 import './index.css'
+
+// 订单状态枚举
+const OrderStatus = {
+  CANCELLED: -1, PENDING: 1, PAID: 2, REFUNDED: 3,
+  SHIPPED: 4, RECEIVED: 5, COMPLETED: 6
+}
+
+const OrderStatusText = {
+  [-1]: '已取消', 1: '待支付', 2: '已支付', 3: '已退款',
+  4: '已发货', 5: '已签收', 6: '已完成'
+}
+
+const OrderStatusColor = {
+  [-1]: 'default', 1: 'warning', 2: 'success', 3: 'error',
+  4: 'processing', 5: 'success', 6: 'success'
+}
 
 function OrderDetail() {
   const { orderId } = useParams()
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // 获取订单
-    const orderData = orderStore.getOrder(orderId)
-    setOrder(orderData)
-
-    // 订阅变化
-    const unsubscribe = orderStore.subscribe((state) => {
-      const updated = state.orders.find(o => o.id === parseInt(orderId))
-      if (updated) setOrder(updated)
-    })
-
-    return unsubscribe
+    setLoading(true)
+    getOrderInfo(orderId)
+      .then(data => setOrder(data))
+      .catch(() => message.error('获取订单详情失败'))
+      .finally(() => setLoading(false))
   }, [orderId])
 
   // 价格显示
@@ -35,12 +46,14 @@ function OrderDetail() {
   }
 
   // 取消订单
-  const handleCancel = () => {
-    const result = orderStore.cancelOrder(orderId)
-    if (result.success) {
+  const handleCancel = async () => {
+    try {
+      await cancelOrder(orderId, '用户取消')
       message.success('订单已取消')
-    } else {
-      message.error(result.message)
+      // 重新加载
+      getOrderInfo(orderId).then(data => setOrder(data))
+    } catch (error) {
+      message.error('取消失败')
     }
   }
 
@@ -49,19 +62,19 @@ function OrderDetail() {
     navigate(`/pay/${orderId}`)
   }
 
-  // 申请退款
-  const handleRefund = () => {
-    const result = orderStore.refundOrder(orderId)
-    if (result.success) {
-      message.success('退款成功，课程权益已移除')
-    } else {
-      message.error(result.message)
-    }
-  }
-
   // 返回列表
   const handleBack = () => {
     navigate('/me/orders')
+  }
+
+  if (loading) {
+    return (
+      <ClientLayout>
+        <div className="order-detail-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '120px 0' }}>
+          <Spin size="large" />
+        </div>
+      </ClientLayout>
+    )
   }
 
   if (!order) {
@@ -88,10 +101,10 @@ function OrderDetail() {
     }
   ]
 
-  if (order.status === OrderStatus.PAID || order.status === OrderStatus.COMPLETED) {
+  if (order.payment_at) {
     timelineItems.push({
       color: 'green',
-      children: `支付成功 ${formatTime(order.pay_at)}`
+      children: `支付成功 ${formatTime(order.payment_at)}`
     })
   }
 
@@ -103,13 +116,15 @@ function OrderDetail() {
   }
 
   if (order.status === OrderStatus.REFUNDED) {
-    timelineItems.push({
-      color: 'green',
-      children: `支付成功 ${formatTime(order.pay_at)}`
-    })
+    if (order.payment_at) {
+      timelineItems.push({
+        color: 'green',
+        children: `支付成功 ${formatTime(order.payment_at)}`
+      })
+    }
     timelineItems.push({
       color: 'red',
-      children: `已退款 ${formatTime(order.refund_at)}${order.refund_reason ? `（${order.refund_reason}）` : ''}`
+      children: `已退款 ${formatTime(order.refund_at)}`
     })
   }
 
@@ -128,20 +143,20 @@ function OrderDetail() {
               <Tag color={OrderStatusColor[order.status]} style={{ fontSize: 16, padding: '4px 12px' }}>
                 {OrderStatusText[order.status]}
               </Tag>
-              <span className="order-no">订单号：{order.order_no}</span>
+              <span className="order-no">订单号：{order.id}</span>
             </div>
           </Card>
 
           {/* 基本信息 */}
           <Card title="订单信息" className="order-detail-card">
             <Descriptions column={2}>
-              <Descriptions.Item label="订单号">{order.order_no}</Descriptions.Item>
+              <Descriptions.Item label="订单号">{order.id}</Descriptions.Item>
               <Descriptions.Item label="订单状态">
                 <Tag color={OrderStatusColor[order.status]}>{OrderStatusText[order.status]}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label="创建时间">{formatTime(order.create_at)}</Descriptions.Item>
-              <Descriptions.Item label="支付时间">{formatTime(order.pay_at)}</Descriptions.Item>
-              <Descriptions.Item label="订单金额">¥{formatPrice(order.total_amount)}</Descriptions.Item>
+              <Descriptions.Item label="支付时间">{formatTime(order.payment_at)}</Descriptions.Item>
+              <Descriptions.Item label="订单金额">¥{formatPrice(order.order_amount)}</Descriptions.Item>
               <Descriptions.Item label="实付金额">
                 <span style={{ color: '#ff4d4f', fontWeight: 600 }}>
                   ¥{formatPrice(order.payment_amount)}
@@ -152,12 +167,12 @@ function OrderDetail() {
 
           {/* 商品信息 */}
           <Card title="商品信息" className="order-detail-card">
-            {order.items.map((item, index) => (
-              <div key={index} className="order-detail-goods-item">
+            {(order.items || []).map((item, index) => (
+              <div key={item.id || index} className="order-detail-goods-item">
                 <div className="goods-cover">课程</div>
                 <div className="goods-info">
-                  <div className="goods-name">{item.name}</div>
-                  <div className="goods-price">¥{formatPrice(item.price)}</div>
+                  <div className="goods-name">{item.goods_snap?.name || `商品 ${item.goods_id}`}</div>
+                  <div className="goods-price">¥{formatPrice(item.payment_amount)}</div>
                 </div>
               </div>
             ))}
@@ -180,14 +195,7 @@ function OrderDetail() {
                 </>
               )}
               {(order.status === OrderStatus.PAID || order.status === OrderStatus.COMPLETED) && (
-                <>
-                  <Button type="primary" onClick={() => navigate('/me/courses')}>
-                    去学习
-                  </Button>
-                  <Popconfirm title="确定申请退款？退款后课程权益将被移除" onConfirm={handleRefund}>
-                    <Button danger>申请退款</Button>
-                  </Popconfirm>
-                </>
+                <Button type="primary" onClick={() => navigate('/me/courses')}>去学习</Button>
               )}
               {order.status === OrderStatus.REFUNDED && (
                 <Button onClick={() => navigate('/')}>重新购买</Button>

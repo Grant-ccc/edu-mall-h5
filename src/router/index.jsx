@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 
 // C端页面
 import Login from '../client/pages/Login'
+import LarkCallback from '../client/pages/LarkCallback'
 import CourseList from '../client/pages/CourseList'
 import CourseDetail from '../client/pages/CourseDetail'
 import MyCourses from '../client/pages/MyCourses'
@@ -19,6 +20,8 @@ import AdminDashboard from '../admin/pages/Dashboard'
 import AdminCourseList from '../admin/pages/CourseList'
 import AdminCourseForm from '../admin/pages/CourseForm'
 import AdminCourseCatalog from '../admin/pages/CourseCatalog'
+import AdminLessonList from '../admin/pages/LessonList'
+import AdminLessonForm from '../admin/pages/LessonForm'
 
 const router = createBrowserRouter([
   // ========== C端路由 ==========
@@ -29,6 +32,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />
+  },
+  {
+    path: '/lark-callback',
+    element: <LarkCallback />
   },
   {
     path: '/courses',
@@ -100,6 +107,19 @@ const router = createBrowserRouter([
   {
     path: '/admin/courses/:id/catalog',
     element: <AdminCourseCatalog />
+  },
+  // 课时管理
+  {
+    path: '/admin/lessons',
+    element: <AdminLessonList />
+  },
+  {
+    path: '/admin/lessons/create',
+    element: <AdminLessonForm />
+  },
+  {
+    path: '/admin/lessons/:id/edit',
+    element: <AdminLessonForm />
   }
 ])
 

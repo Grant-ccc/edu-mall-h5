@@ -36,31 +36,21 @@ function CourseList() {
   }, [])
 
   // 加载课程列表
-  const loadCourses = () => {
+  const loadCourses = async () => {
     setLoading(true)
-
-    // 模拟 API 调用延迟
-    setTimeout(() => {
-      let list = courseStore.getCourses()
-
-      // 应用筛选
-      if (filters.name_kw) {
-        list = list.filter(c => c.name.toLowerCase().includes(filters.name_kw.toLowerCase()))
-      }
-      if (filters.status !== null) {
-        list = list.filter(c => c.status === filters.status)
-      }
-      if (filters.update_status !== null) {
-        list = list.filter(c => c.update_status === filters.update_status)
-      }
-
-      // 排序
-      list.sort((a, b) => b.update_at - a.update_at)
-
+    try {
+      const params = {}
+      if (filters.name_kw) params.name_kw = filters.name_kw
+      if (filters.status !== null) params.status = filters.status
+      await courseStore.fetchCourses(params)
+      const list = courseStore.getCourses()
       setCourses(list)
       setTotal(list.length)
+    } catch (error) {
+      console.error('加载课程列表失败:', error)
+    } finally {
       setLoading(false)
-    }, 300)
+    }
   }
 
   // 价格格式化（分转元）
@@ -89,9 +79,9 @@ function CourseList() {
   }
 
   // 上架/下架
-  const handleToggleStatus = (id, currentStatus) => {
+  const handleToggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === CourseStatus.ONLINE ? CourseStatus.OFFLINE : CourseStatus.ONLINE
-    const result = courseStore.updateStatus(id, newStatus)
+    const result = await courseStore.updateStatus(id, newStatus)
     if (result.success) {
       message.success(newStatus === CourseStatus.ONLINE ? '上架成功' : '下架成功')
     } else {
@@ -100,8 +90,8 @@ function CourseList() {
   }
 
   // 删除课程
-  const handleDelete = (id) => {
-    const result = courseStore.deleteCourse(id)
+  const handleDelete = async (id) => {
+    const result = await courseStore.deleteCourse(id)
     if (result.success) {
       message.success('删除成功')
     } else {

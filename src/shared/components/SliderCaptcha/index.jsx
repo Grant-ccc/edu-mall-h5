@@ -1,137 +1,116 @@
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
+import { getCaptcha, checkCaptcha } from '../../../client/api/auth'
 import './index.css'
 
 /**
- * 滑块验证码组件（演示版）
- * 滑动到右侧即视为验证通过
+ * 滑块验证码组件（弹窗模式）
+ * 使用 GoCaptcha.Slide 全局库，调用真实 API
  */
-function SliderCaptcha({ onSuccess, onReset }) {
-  const [dragging, setDragging] = useState(false)
-  const [position, setPosition] = useState(0)
-  const [verified, setVerified] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const containerRef = useRef(null)
+function SliderCaptcha({ onSuccess, onReset, visible, onClose }) {
+  const wrapRef = useRef(null)
+  const captchaRef = useRef(null)
+  const captchaKeyRef = useRef('')
 
-  // 容器宽度（滑块可移动范围）
-  const containerWidth = 280
-  const sliderWidth = 40
-  const maxPosition = containerWidth - sliderWidth
+  const CW = 300
+  const CH = 220
 
-  // 重置
-  const reset = () => {
-    setPosition(0)
-    setVerified(false)
-    setDragging(false)
-    if (onReset) onReset()
+  // 生成签名（与 login(1).html 一致）
+  const generateSign = (once, ts) => {
+    const secret = 'daqing2025'
+    const msg = once + secret + ts
+    let hash = 0
+    for (let i = 0; i < msg.length; i++) {
+      hash = ((hash << 5) - hash) + msg.charCodeAt(i)
+      hash = hash & hash
+    }
+    return Math.abs(hash).toString(16).padStart(32, '0').toLowerCase()
   }
 
-  // 暴露重置方法
+  // 初始化验证码 —— 完全照搬 login(1).html 的 initAndLoadCaptcha
+  const initCaptcha = useCallback(async () => {
+    if (!window.GoCaptcha || !window.GoCaptcha.Slide || !wrapRef.current) return
+
+    try {
+      // 1. 获取验证码数据
+      const once = Math.random().toString(36).substring(2, 10)
+      const ts = Date.now()
+      const sign = await generateSign(once, ts)
+      const captchaData = await getCaptcha(once, ts, sign)
+
+      captchaKeyRef.current = captchaData.key
+
+      // 2. 销毁之前的实例
+      if (captchaRef.current) { captchaRef.current.destroy(); captchaRef.current = null }
+      wrapRef.current.innerHTML = ''
+
+      // 3. 创建新实例
+      const captcha = new window.GoCaptcha.Slide({ width: CW, height: CH })
+      captcha.mount(wrapRef.current)
+
+      // 4. 设置数据 (thumbX: 0 从左侧起点，和 login(1).html 一致)
+      captcha.setData({
+        image: captchaData.image_base64,
+        thumb: captchaData.title_image_base64,
+        thumbX: 0,
+        thumbY: captchaData.title_y || 0,
+        thumbWidth: captchaData.title_width || 50,
+        thumbHeight: captchaData.title_height || 50
+      })
+
+      // 5. 设置事件
+      captcha.setEvents({
+        confirm: async function (point, reset) {
+          try {
+            const result = await checkCaptcha(
+              captchaKeyRef.current,
+              Math.round(point.x),
+              Math.round(point.y)
+            )
+            if (onSuccess) onSuccess(result.ticket)
+          } catch (error) {
+            console.error('验证失败:', error)
+            if (reset) reset()
+          }
+        },
+        refresh: function () { initCaptcha() },
+        close: function () { if (onClose) onClose() }
+      })
+
+      captchaRef.current = captcha
+    } catch (error) {
+      console.error('初始化验证码失败:', error)
+    }
+  }, [onSuccess, onClose])
+
   useEffect(() => {
-    if (onReset) {
-      // 可以通过 ref 调用重置
+    const checkLib = () => {
+      if (window.GoCaptcha && window.GoCaptcha.Slide) {
+        initCaptcha()
+      } else {
+        setTimeout(checkLib, 200)
+      }
     }
-  }, [onReset])
+    checkLib()
+  }, [initCaptcha])
 
-  // 鼠标/触摸开始
-  const handleStart = (e) => {
-    if (verified) return
-    e.preventDefault()
-    const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX
-    setDragging(true)
-    setStartX(clientX - position)
-  }
+  useEffect(() => () => {
+    if (captchaRef.current) { captchaRef.current.destroy(); captchaRef.current = null }
+  }, [])
 
-  // 鼠标/触摸移动
-  const handleMove = (e) => {
-    if (!dragging || verified) return
-    const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX
-    let newPosition = clientX - startX
-
-    // 限制范围
-    if (newPosition < 0) newPosition = 0
-    if (newPosition > maxPosition) newPosition = maxPosition
-
-    setPosition(newPosition)
-  }
-
-  // 鼠标/触摸结束
-  const handleEnd = () => {
-    if (verified) return
-    setDragging(false)
-
-    // 判断是否验证成功（滑动到接近右侧）
-    if (position >= maxPosition - 5) {
-      setPosition(maxPosition)
-      setVerified(true)
-      // 生成演示 ticket
-      const ticket = 'mock_ticket_' + Date.now()
-      if (onSuccess) onSuccess(ticket)
-    } else {
-      // 未成功，滑回起点
-      setPosition(0)
-    }
-  }
-
-  // 点击重置
-  const handleRefresh = () => {
-    reset()
-  }
+  if (visible === false) return null
 
   return (
-    <div className="slider-captcha-wrapper">
-      <div className="slider-captcha-label">
-        {verified ? '验证成功' : '请拖动滑块完成验证'}
-      </div>
-      <div
-        className={`slider-captcha-container ${verified ? 'verified' : ''}`}
-        ref={containerRef}
-        onMouseMove={handleMove}
-        onMouseUp={handleEnd}
-        onMouseLeave={handleEnd}
-        onTouchMove={handleMove}
-        onTouchEnd={handleEnd}
-      >
-        {/* 背景轨道 */}
-        <div className="slider-track">
-          {/* 已滑动区域 */}
-          <div
-            className="slider-filled"
-            style={{ width: position + sliderWidth / 2 }}
-          />
-        </div>
-
-        {/* 滑块 */}
-        <div
-          className={`slider-button ${dragging ? 'dragging' : ''} ${verified ? 'verified' : ''}`}
-          style={{ left: position }}
-          onMouseDown={handleStart}
-          onTouchStart={handleStart}
-        >
-          {verified ? (
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          )}
-        </div>
-
-        {/* 提示文字 */}
-        {!verified && (
-          <div className="slider-tip">
-            向右滑动
+    <div className="captcha-modal-overlay" onClick={(e) => {
+      if (e.target === e.currentTarget && onClose) onClose()
+    }}>
+      <div className="captcha-modal">
+        <div ref={wrapRef} style={{ width: CW, height: CH }}>
+          <div className="captcha-loading">
+            <span className="captcha-spinner" />
+            <span>加载验证码中...</span>
           </div>
-        )}
+        </div>
       </div>
-
-      {/* 刷新按钮 */}
-      <button className="slider-refresh" onClick={handleRefresh} title="重置">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-          <path d="M17.65 6.35C16.15 4.85 14.15 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.44 7.73-5.73h-2.08c-.82 2.14-2.91 3.73-5.65 3.73-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
-        </svg>
-      </button>
     </div>
   )
 }

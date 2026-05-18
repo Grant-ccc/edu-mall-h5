@@ -37,7 +37,7 @@ function ClientLayout({ children }) {
   // 登出
   const handleLogout = () => {
     authStore.logout()
-    navigate('/login')
+    navigate('/login?from=logout')
   }
 
   // 用户下拉菜单

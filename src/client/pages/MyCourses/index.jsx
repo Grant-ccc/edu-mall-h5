@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Button, Empty, Tag } from 'antd'
+import { Card, Button, Empty, Tag, Spin, message } from 'antd'
 import { PlayCircleOutlined, ClockCircleOutlined } from '@ant-design/icons'
 import ClientLayout from '../../layouts/ClientLayout'
 import authStore from '../../stores/authStore'
-import userCourseStore from '../../stores/userCourseStore'
+import { getPurchasedCourseList } from '../../api/course'
 import './index.css'
 
 function MyCourses() {
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
   const [courses, setCourses] = useState([])
 
   useEffect(() => {
@@ -17,15 +18,19 @@ function MyCourses() {
       return
     }
 
-    // 初始加载
-    setCourses(userCourseStore.getCourses())
-
-    // 订阅变化
-    const unsubscribe = userCourseStore.subscribe((state) => {
-      setCourses(state.courses)
-    })
-
-    return unsubscribe
+    // 调用 API 获取已购课程列表
+    setLoading(true)
+    getPurchasedCourseList({ unlimited: true })
+      .then(data => {
+        setCourses(data.list || [])
+      })
+      .catch(error => {
+        console.error('获取已购课程失败:', error)
+        message.error('获取已购课程失败')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   // 时间格式化
@@ -43,6 +48,18 @@ function MyCourses() {
   // 去学习
   const handleLearn = (courseId) => {
     navigate(`/learn/${courseId}`)
+  }
+
+  if (loading) {
+    return (
+      <ClientLayout>
+        <div className="my-courses-page">
+          <div className="my-courses-loading">
+            <Spin size="large" tip="加载中..." />
+          </div>
+        </div>
+      </ClientLayout>
+    )
   }
 
   return (
@@ -86,11 +103,11 @@ function MyCourses() {
                       <div className="my-course-meta">
                         <span>
                           <ClockCircleOutlined style={{ marginRight: 4 }} />
-                          购买于 {formatTime(course.purchase_time)}
+                          有效期至 {formatTime(course.learn_expire_time || course.service_expire_time)}
                         </span>
-                        {course.learn_expire_time && (
+                        {(course.learn_expire_time || course.service_expire_time) && (
                           <Tag color={expired ? 'error' : 'blue'}>
-                            有效期至 {formatTime(course.learn_expire_time)}
+                            {expired ? '已过期' : '有效'}
                           </Tag>
                         )}
                       </div>

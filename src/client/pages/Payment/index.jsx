@@ -1,21 +1,30 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, Spin, Tag, Button, message, Radio } from 'antd'
-import { WechatOutlined, SafetyOutlined } from '@ant-design/icons'
+import { WechatOutlined } from '@ant-design/icons'
 import ClientLayout from '../../layouts/ClientLayout'
-import orderStore, { OrderStatusText, OrderStatus } from '../../stores/orderStore'
+import { getOrderInfo, payLater } from '../../api/order'
 import './index.css'
 
-// Mock 课程数据
-const mockCourseMap = {
-  1: { id: 1, name: 'Go语言在线教育商城实战', course_price: 9900 },
-  2: { id: 2, name: 'React前端工程化实战', course_price: 7900 },
-  3: { id: 3, name: 'TypeScript深入浅出', course_price: 5900 },
-  4: { id: 4, name: 'Node.js服务端开发', course_price: 8900 },
-  5: { id: 5, name: 'Vue3全家桶实战', course_price: 6900 },
-  6: { id: 6, name: 'MySQL数据库设计与优化', course_price: 4900 },
-  7: { id: 7, name: 'Redis缓存实战应用', course_price: 3900 },
-  8: { id: 8, name: 'Docker容器化部署', course_price: 2900 }
+// 订单状态
+const OrderStatus = {
+  CANCELLED: -1,
+  PENDING: 1,
+  PAID: 2,
+  REFUNDED: 3,
+  SHIPPED: 4,
+  RECEIVED: 5,
+  COMPLETED: 6
+}
+
+const OrderStatusText = {
+  [-1]: '已取消',
+  1: '待支付',
+  2: '已支付',
+  3: '已退款',
+  4: '已发货',
+  5: '已签收',
+  6: '已完成'
 }
 
 function Payment() {
@@ -23,26 +32,28 @@ function Payment() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [order, setOrder] = useState(null)
+  const [payData, setPayData] = useState(null) // 支付参数
   const [paying, setPaying] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('wechat')
 
   useEffect(() => {
-    // 获取订单信息
-    const orderData = orderStore.getOrder(orderId)
-    if (orderData) {
-      setOrder(orderData)
-    }
-    setLoading(false)
-
-    // 订阅订单状态变化
-    const unsubscribe = orderStore.subscribe((state) => {
-      const updatedOrder = state.orders.find(o => o.id === parseInt(orderId))
-      if (updatedOrder) {
-        setOrder(updatedOrder)
-      }
-    })
-
-    return unsubscribe
+    // 获取订单详情
+    setLoading(true)
+    getOrderInfo(orderId)
+      .then(data => {
+        setOrder(data)
+        // 如果订单待支付，获取支付参数
+        if (data.status === OrderStatus.PENDING) {
+          return payLater(orderId)
+        }
+      })
+      .then(data => {
+        if (data) setPayData(data)
+      })
+      .catch(() => {
+        message.error('获取订单信息失败')
+      })
+      .finally(() => setLoading(false))
   }, [orderId])
 
   // 价格显示
@@ -55,25 +66,38 @@ function Payment() {
     return date.toLocaleString('zh-CN')
   }
 
-  // 模拟支付成功
+  // 发起支付
+  const handlePay = async () => {
+    setPaying(true)
+    try {
+      const data = await payLater(orderId, 'h5')
+      setPayData(data)
+      // 如果有二维码URL，直接用微信打开
+      if (data.code_url) {
+        // Native 支付：展示二维码
+        message.info('请使用微信扫描二维码完成支付')
+      } else if (data.package) {
+        // JSAPI 支付：调用微信 JSAPI（需在微信环境中）
+        message.info('微信支付参数已就绪')
+      }
+    } catch (error) {
+      console.error('获取支付参数失败:', error)
+    } finally {
+      setPaying(false)
+    }
+  }
+
+  // 模拟支付成功（开发/演示用）
   const handleMockPay = async () => {
     setPaying(true)
-
-    // 模拟支付过程
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    const result = orderStore.payOrder(orderId)
-
-    setPaying(false)
-
-    if (result.success) {
+    try {
+      await payLater(orderId, 'h5')
       message.success('支付成功')
-      // 跳转支付成功页
-      setTimeout(() => {
-        navigate(`/payment-success?orderId=${orderId}`)
-      }, 500)
-    } else {
-      message.error(result.message)
+      navigate(`/payment-success?orderId=${orderId}`)
+    } catch (error) {
+      console.error('支付失败:', error)
+    } finally {
+      setPaying(false)
     }
   }
 
@@ -106,7 +130,7 @@ function Payment() {
           <Card>
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
               <h2>订单状态：{OrderStatusText[order.status]}</h2>
-              <p>订单号：{order.order_no}</p>
+              <p>订单ID：{order.id}</p>
               <Button type="primary" onClick={() => navigate('/me/orders')}>
                 返回订单列表
               </Button>
@@ -127,7 +151,7 @@ function Payment() {
           <Card className="payment-order-card" title="订单信息">
             <div className="payment-order-row">
               <span className="label">订单号</span>
-              <span className="value">{order.order_no}</span>
+              <span className="value">{order.id}</span>
             </div>
             <div className="payment-order-row">
               <span className="label">创建时间</span>
@@ -141,10 +165,10 @@ function Payment() {
 
           {/* 商品信息 */}
           <Card className="payment-goods-card" title="商品信息">
-            {order.items.map((item, index) => (
-              <div key={index} className="payment-goods-item">
-                <span className="goods-name">{item.name}</span>
-                <span className="goods-price">¥{formatPrice(item.price)}</span>
+            {(order.items || []).map((item, index) => (
+              <div key={item.id || index} className="payment-goods-item">
+                <span className="goods-name">{item.goods_snap?.name || `商品 ${item.goods_id}`}</span>
+                <span className="goods-price">¥{formatPrice(item.payment_amount)}</span>
               </div>
             ))}
           </Card>
@@ -159,38 +183,40 @@ function Payment() {
             </Radio.Group>
           </Card>
 
-          {/* 支付二维码（演示） */}
+          {/* 支付二维码 */}
           <Card className="payment-qrcode-card">
-            <div className="payment-qrcode">
-              <div style={{
-                width: 200,
-                height: 200,
-                margin: '0 auto',
-                background: '#f0f0f0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 8
-              }}>
-                <div style={{ textAlign: 'center', color: '#999' }}>
-                  <WechatOutlined style={{ fontSize: 48, color: '#07c160' }} />
-                  <p style={{ marginTop: 8 }}>微信扫码支付</p>
-                </div>
+            {payData?.code_url ? (
+              <div className="payment-qrcode">
+                <img src={payData.code_url} alt="微信支付二维码" style={{ width: 200, height: 200, margin: '0 auto', display: 'block' }} />
+                <p className="qrcode-tip">请使用微信扫描二维码完成支付</p>
               </div>
-              <p className="qrcode-tip">请使用微信扫描二维码完成支付</p>
-            </div>
+            ) : (
+              <div className="payment-qrcode">
+                <div style={{
+                  width: 200, height: 200, margin: '0 auto', background: '#f0f0f0',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8
+                }}>
+                  <div style={{ textAlign: 'center', color: '#999' }}>
+                    <WechatOutlined style={{ fontSize: 48, color: '#07c160' }} />
+                    <p style={{ marginTop: 8 }}>微信扫码支付</p>
+                  </div>
+                </div>
+                <p className="qrcode-tip">请使用微信扫描二维码完成支付</p>
+              </div>
+            )}
 
-            {/* 演示模式 */}
             <div className="payment-demo">
               <Button
                 type="primary"
                 size="large"
                 loading={paying}
-                onClick={handleMockPay}
+                onClick={payData?.code_url ? handlePay : handleMockPay}
               >
-                模拟支付成功
+                {payData?.code_url ? '重新获取支付码' : '模拟支付成功'}
               </Button>
-              <p className="demo-tip">演示模式：点击按钮模拟支付成功</p>
+              <p className="demo-tip">
+                {payData?.code_url ? '支付码有效期有限，可刷新获取新码' : '演示模式：点击按钮模拟支付成功'}
+              </p>
             </div>
           </Card>
         </div>

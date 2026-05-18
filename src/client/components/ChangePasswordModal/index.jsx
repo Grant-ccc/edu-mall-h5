@@ -3,6 +3,7 @@ import { Modal, Form, Input, Button, message } from 'antd'
 import { LockOutlined, SafetyOutlined } from '@ant-design/icons'
 import SliderCaptcha from '../../../shared/components/SliderCaptcha'
 import authStore from '../../stores/authStore'
+import { changePassword, changePasswordSmsCode } from '../../api/user'
 import './index.css'
 
 /**
@@ -48,9 +49,13 @@ function ChangePasswordModal({ visible, onClose }) {
       return
     }
 
-    // 演示模式
-    message.success('验证码已发送（演示模式，验证码：123456）')
-    setCountdown(60)
+    try {
+      await changePasswordSmsCode(captchaTicket)
+      message.success('验证码已发送')
+      setCountdown(60)
+    } catch (error) {
+      console.error('发送验证码失败:', error)
+    }
   }
 
   // 提交修改密码
@@ -65,24 +70,25 @@ function ChangePasswordModal({ visible, onClose }) {
 
       setLoading(true)
 
-      // 演示模式：验证码为 123456 即可成功
-      if (values.verifyCode !== '123456') {
-        message.error('验证码错误（演示模式请输入：123456）')
-        setLoading(false)
-        return
-      }
+      const result = await changePassword(
+        values.oldPassword,
+        values.newPassword,
+        values.confirmPassword,
+        values.verifyCode
+      )
 
-      // 模拟接口返回
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      message.success('密码修改成功，请重新登录')
       setLoading(false)
-      onClose()
 
-      // 清除登录态，跳转登录页
-      authStore.logout()
-      window.location.href = '/login'
-
+      // 检查是否需要重新登录
+      if (result?.relogin_required) {
+        message.success('密码修改成功，请重新登录')
+        onClose()
+        authStore.logout()
+        window.location.href = '/login'
+      } else {
+        message.success('密码修改成功')
+        onClose()
+      }
     } catch (error) {
       setLoading(false)
     }
@@ -102,6 +108,18 @@ function ChangePasswordModal({ visible, onClose }) {
         layout="vertical"
         className="change-password-form"
       >
+        {/* 旧密码 */}
+        <Form.Item
+          label="旧密码"
+          name="oldPassword"
+          rules={[{ required: true, message: '请输入旧密码' }]}
+        >
+          <Input.Password
+            placeholder="请输入旧密码"
+            prefix={<LockOutlined />}
+          />
+        </Form.Item>
+
         {/* 滑块验证 */}
         <Form.Item label="安全验证">
           <SliderCaptcha onSuccess={handleCaptchaSuccess} />

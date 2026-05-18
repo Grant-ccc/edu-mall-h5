@@ -12,6 +12,7 @@
   "dependencies": {
     "antd": "^6.3.7",
     "axios": "^1.16.0",
+    "go-captcha-jslib": "^1.0.9",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.15.0"

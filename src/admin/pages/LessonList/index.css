@@ -1,0 +1,46 @@
+.lesson-list-page {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  min-height: calc(100vh - 64px);
+}
+
+.category-panel {
+  flex: 0 0 240px;
+  min-height: 100%;
+}
+
+.lesson-panel {
+  flex: 1;
+  min-height: 100%;
+
+  .ant-card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+}
+
+.lesson-filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.move-modal-content {
+  p {
+    margin-bottom: 12px;
+  }
+}
+
+/* 表格操作按钮 */
+.ant-table-cell {
+  .ant-btn-link {
+    padding: 0 8px;
+  }
+}

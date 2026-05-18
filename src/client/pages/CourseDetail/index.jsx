@@ -5,74 +5,11 @@ import { PlayCircleOutlined, ClockCircleOutlined, SafetyOutlined } from '@ant-de
 import ClientLayout from '../../layouts/ClientLayout'
 import authStore from '../../stores/authStore'
 import cartStore from '../../stores/cartStore'
-import userCourseStore from '../../stores/userCourseStore'
+import { getCourseDetail } from '../../api/course'
 import './index.css'
 
 const { Panel } = Collapse
 const { TabPane } = Tabs
-
-// Mock 课程详情数据
-const getMockCourseDetail = (id) => ({
-  id: parseInt(id),
-  name: 'Go语言在线教育商城实战',
-  cover_url: '',
-  detail_cover_url: '',
-  course_price: 9900,
-  features: ['录播', '实战', '答疑', '源码'],
-  learn_time: 30,
-  service_time: 365,
-  update_status: 1,
-  has_purchased: false,
-  detail: `
-    <h3>课程介绍</h3>
-    <p>本课程带你从零开始，使用 Go 语言构建一个完整的在线教育商城系统。</p>
-    <p>课程涵盖：</p>
-    <ul>
-      <li>Go 语言基础与进阶</li>
-      <li>Gin 框架实战</li>
-      <li>MySQL 数据库设计</li>
-      <li>Redis 缓存应用</li>
-      <li>订单与支付系统</li>
-      <li>学习进度管理</li>
-    </ul>
-    <h3>适合人群</h3>
-    <p>有一定编程基础，想要学习 Go 语言后端开发的同学。</p>
-  `,
-  total_duration: 7200,
-  lesson_count: 48,
-  catalogs: [
-    {
-      id: 1,
-      name: '第一章：项目初始化',
-      sort: 1,
-      lessons: [
-        { lesson_id: 101, name: '1-1 项目介绍与环境搭建', duration: 600, enable_trial: 1 },
-        { lesson_id: 102, name: '1-2 Go Module初始化', duration: 480, enable_trial: 1 },
-        { lesson_id: 103, name: '1-3 项目目录结构设计', duration: 520, enable_trial: 0 }
-      ]
-    },
-    {
-      id: 2,
-      name: '第二章：数据库设计',
-      sort: 2,
-      lessons: [
-        { lesson_id: 201, name: '2-1 用户表设计', duration: 580, enable_trial: 0 },
-        { lesson_id: 202, name: '2-2 课程表设计', duration: 620, enable_trial: 0 },
-        { lesson_id: 203, name: '2-3 订单表设计', duration: 700, enable_trial: 0 }
-      ]
-    },
-    {
-      id: 3,
-      name: '第三章：用户认证',
-      sort: 3,
-      lessons: [
-        { lesson_id: 301, name: '3-1 手机号登录实现', duration: 800, enable_trial: 0 },
-        { lesson_id: 302, name: '3-2 JWT Token生成与验证', duration: 650, enable_trial: 0 },
-        { lesson_id: 303, name: '3-3 微信扫码登录', duration: 900, enable_trial: 0 }
-      ]
-    }
-  ]
-})
 
 function CourseDetail() {
   const { id } = useParams()
@@ -80,30 +17,32 @@ function CourseDetail() {
   const [loading, setLoading] = useState(true)
   const [course, setCourse] = useState(null)
   const [activeCatalogKey, setActiveCatalogKey] = useState(['1'])
-  const [, forceUpdate] = useState(0) // 用于触发重新渲染
 
   useEffect(() => {
-    // 模拟加载
+    // 调用 API 获取课程详情
     setLoading(true)
-    setTimeout(() => {
-      setCourse(getMockCourseDetail(id))
-      setLoading(false)
-    }, 500)
+    getCourseDetail(id)
+      .then(data => {
+        setCourse(data)
+        // 默认展开第一个目录
+        if (data.catalogs && data.catalogs.length > 0) {
+          setActiveCatalogKey([String(data.catalogs[0].id)])
+        }
+      })
+      .catch(error => {
+        console.error('获取课程详情失败:', error)
+        message.error('获取课程详情失败')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [id])
-
-  // 监听已购课程变化，触发重新渲染
-  useEffect(() => {
-    const unsubscribe = userCourseStore.subscribe(() => {
-      forceUpdate(n => n + 1)
-    })
-    return unsubscribe
-  }, [])
 
   // 价格显示
   const priceYuan = course ? (course.course_price / 100).toFixed(2) : '0.00'
 
-  // 已购状态（从 userCourseStore 实时获取）
-  const hasPurchased = course ? userCourseStore.hasCourse(course.id) : false
+  // 已购状态（从 API 返回的 has_purchased 字段获取）
+  const hasPurchased = course ? course.has_purchased : false
 
   // 时长格式化
   const formatDuration = (seconds) => {

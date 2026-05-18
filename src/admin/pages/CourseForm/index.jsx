@@ -24,22 +24,25 @@ function CourseForm() {
   // 编辑模式：加载课程数据
   useEffect(() => {
     if (isEdit) {
-      const course = courseStore.getCourse(id)
-      if (course) {
-        form.setFieldsValue({
-          name: course.name,
-          course_price: course.course_price / 100,
-          service_time: course.service_time,
-          learn_time: course.learn_time,
-          update_status: course.update_status,
-          status: course.status,
-          detail: course.detail
-        })
-        setFeatures(course.features || [])
-      } else {
-        message.error('课程不存在')
-        navigate('/admin/courses')
-      }
+      courseStore.fetchCourseDetail(id).then(course => {
+        if (course) {
+          form.setFieldsValue({
+            name: course.name,
+            course_price: course.course_price / 100,
+            service_time: course.service_time,
+            learn_time: course.learn_time,
+            update_status: course.update_status,
+            status: course.status,
+            detail: course.detail
+          })
+          setFeatures(course.features || [])
+        } else {
+          message.error('课程不存在')
+          navigate('/admin/courses')
+        }
+      }).catch(() => {
+        message.error('加载课程失败')
+      })
     }
   }, [id])
 
@@ -64,14 +67,14 @@ function CourseForm() {
 
       let result
       if (isEdit) {
-        result = courseStore.updateCourse({ ...courseData, id: parseInt(id) })
+        result = await courseStore.updateCourse({ ...courseData, id: parseInt(id) })
       } else {
-        result = courseStore.createCourse(courseData)
+        result = await courseStore.createCourse(courseData)
       }
 
       setLoading(false)
 
-      if (result.success || result.id) {
+      if (result.success) {
         message.success(isEdit ? '更新成功' : '创建成功')
         navigate('/admin/courses')
       } else {

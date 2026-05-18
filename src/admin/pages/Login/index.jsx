@@ -30,7 +30,7 @@ function AdminLogin() {
   const handlePasswordLogin = async (values) => {
     setLoading(true)
     try {
-      const result = adminAuthStore.login(values.mobile, values.password)
+      const result = await adminAuthStore.login(values.mobile, values.password)
       if (result.success) {
         message.success('登录成功')
         navigate('/admin')
@@ -75,7 +75,7 @@ function AdminLogin() {
   const handleVerifyCodeLogin = async (values) => {
     setLoading(true)
     try {
-      const result = adminAuthStore.loginWithVerifyCode(values.mobile, values.verify_code)
+      const result = await adminAuthStore.loginWithVerifyCode(values.mobile, values.verify_code)
       if (result.success) {
         message.success('登录成功')
         navigate('/admin')
