@@ -189,6 +189,53 @@ const mockContinueLearn = [
   }
 ]
 
+// ==================== 管理端 Mock 数据 ====================
+
+// 课时分类
+let mockAdminCategories = [
+  { id: 1, name: 'Go语言开发', parent_id: -1, level: 1, sort: 1, status: 1, create_at: now - day * 30, update_at: now },
+  { id: 2, name: '前端开发', parent_id: -1, level: 1, sort: 2, status: 1, create_at: now - day * 28, update_at: now },
+  { id: 3, name: '数据库', parent_id: -1, level: 1, sort: 3, status: 1, create_at: now - day * 26, update_at: now },
+  { id: 4, name: 'Go基础语法', parent_id: 1, level: 2, sort: 1, status: 1, create_at: now - day * 25, update_at: now },
+  { id: 5, name: 'Go Web框架', parent_id: 1, level: 2, sort: 2, status: 1, create_at: now - day * 24, update_at: now }
+]
+
+// 课时
+let mockAdminLessons = [
+  { id: 1, name: 'Go语言环境搭建', category_id: 4, category_name: 'Go基础语法', detail: '安装Go SDK，配置开发环境', duration: 600, status: 1, create_at: now - day * 20, update_at: now },
+  { id: 2, name: '变量与数据类型', category_id: 4, category_name: 'Go基础语法', detail: 'Go语言的基本数据类型', duration: 480, status: 1, create_at: now - day * 19, update_at: now },
+  { id: 3, name: '控制流程', category_id: 4, category_name: 'Go基础语法', detail: 'if/for/switch等控制语句', duration: 520, status: 1, create_at: now - day * 18, update_at: now },
+  { id: 4, name: 'Gin框架入门', category_id: 5, category_name: 'Go Web框架', detail: 'Gin框架基础使用', duration: 720, status: 1, create_at: now - day * 17, update_at: now },
+  { id: 5, name: 'React组件化开发', category_id: 2, category_name: '前端开发', detail: 'React组件化开发思想', duration: 900, status: 1, create_at: now - day * 16, update_at: now },
+  { id: 6, name: 'MySQL表设计', category_id: 3, category_name: '数据库', detail: '数据库表设计规范', duration: 580, status: 1, create_at: now - day * 15, update_at: now }
+]
+
+// 订单
+let mockAdminOrders = [
+  { id: 20260510001, user_id: 1001, user_mobile: '13800001111', user_nickname: '测试用户', status: 2, payment_amount: 9900, order_amount: 9900, discount_amount: 0, trade_no: 'MOCK_TRADE_001', create_at: now - day * 3, payment_at: now - day * 3 + 600000, items: [{ goods_id: 1, goods_name: 'Go语言在线教育商城实战', payment_amount: 9900, goods_snap: { name: 'Go语言在线教育商城实战' } }] },
+  { id: 20260510002, user_id: 1002, user_mobile: '13900002222', user_nickname: '张三', status: 1, payment_amount: 7900, order_amount: 7900, discount_amount: 0, trade_no: '', create_at: now - day * 1, payment_at: null, items: [{ goods_id: 2, goods_name: 'React前端工程化实战', payment_amount: 7900, goods_snap: { name: 'React前端工程化实战' } }] },
+  { id: 20260509003, user_id: 1003, user_mobile: '13700003333', user_nickname: '李四', status: 2, payment_amount: 5900, order_amount: 5900, discount_amount: 0, trade_no: 'MOCK_TRADE_003', create_at: now - day * 5, payment_at: now - day * 5 + 1200000, items: [{ goods_id: 3, goods_name: 'TypeScript深入浅出', payment_amount: 5900, goods_snap: { name: 'TypeScript深入浅出' } }] },
+  { id: 20260508004, user_id: 1004, user_mobile: '13600004444', user_nickname: '王五', status: 3, payment_amount: 8900, order_amount: 8900, discount_amount: 0, trade_no: 'MOCK_TRADE_004', create_at: now - day * 8, payment_at: now - day * 8 + 300000, items: [{ goods_id: 4, goods_name: 'Node.js服务端开发', payment_amount: 8900, goods_snap: { name: 'Node.js服务端开发' } }] },
+  { id: 20260507005, user_id: 1005, user_mobile: '13500005555', user_nickname: '赵六', status: -1, payment_amount: 6900, order_amount: 6900, discount_amount: 0, trade_no: '', create_at: now - day * 10, payment_at: null, items: [{ goods_id: 5, goods_name: 'Vue3全家桶实战', payment_amount: 6900, goods_snap: { name: 'Vue3全家桶实战' } }] }
+]
+
+// C端用户
+let mockAdminUsers = [
+  { user_id: 1001, nick_name: '测试用户', mobile: '13800001111', sex: 1, status: 1, wechat_bind: false, create_at: now - day * 30, last_login_at: now - 60000 },
+  { user_id: 1002, nick_name: '张三', mobile: '13900002222', sex: 1, status: 1, wechat_bind: true, create_at: now - day * 25, last_login_at: now - day * 2 },
+  { user_id: 1003, nick_name: '李四', mobile: '13700003333', sex: 2, status: 1, wechat_bind: false, create_at: now - day * 20, last_login_at: now - day * 5 },
+  { user_id: 1004, nick_name: '王五', mobile: '13600004444', sex: 1, status: -1, wechat_bind: false, create_at: now - day * 15, last_login_at: now - day * 10 },
+  { user_id: 1005, nick_name: '赵六', mobile: '13500005555', sex: 2, status: 1, wechat_bind: true, create_at: now - day * 10, last_login_at: now - day * 1 },
+  { user_id: 1006, nick_name: '孙七', mobile: '13400006666', sex: 1, status: -1, wechat_bind: false, create_at: now - day * 5, last_login_at: now - day * 3 }
+]
+
+// 系统设置
+let mockAdminSettings = [
+  { key: 'site_name', value: '在线教育商城', label: '站点名称' },
+  { key: 'service_phone', value: '400-123-4567', label: '客服电话' },
+  { key: 'announcement', value: '欢迎来到在线教育商城！', label: '站点公告' }
+]
+
 // 购物车 mock
 let mockCartGoods = [
   // 初始为空，通过添加操作动态填充
@@ -458,6 +505,127 @@ const handlers = {
   'GET:/customer/v1/order/info': (params) => {
     const order = mockOrders.find(o => o.id === parseInt(params.order_id))
     return resp(order || mockOrders[0] || null)
+  },
+
+  // ==================== 管理端 Mock ====================
+
+  // === 认证 ===
+  'GET:/admin/v1/user/verify/captcha': () => resp(getMockCaptcha()),
+  'POST:/admin/v1/user/verify/captcha/check': () => resp({ ticket: 'mock_admin_ticket_' + Date.now(), expire: Date.now() + 300000 }),
+  'POST:/admin/v1/user/verify/smscode': () => resp({ debug_verify_code: '123456' }),
+  'POST:/admin/v1/user/mobile/password_login': () => resp({
+    token: 'mock_admin_token_' + Date.now(),
+    user_info: { user: { user_id: 1, nick_name: '超级管理员', icon_url: '', sex: 1, status: 1, last_login_at: Date.now(), update_at: Date.now(), wechat_bind: false, can_unbind_wechat: false, has_password: true, create_at: Date.now() - 86400000 * 30 }, mobile_user: { mobile: '13800000000', user_id: 1 }, wechat_user: null, app_users: [] }
+  }),
+  'POST:/admin/v1/user/mobile/verify_login': (body) => {
+    if (body.verify_code !== '123456') return { code: 1, msg: '验证码错误', data: null }
+    return resp({ token: 'mock_admin_token_' + Date.now(), user_info: { user: { user_id: 1, nick_name: '超级管理员', icon_url: '', sex: 1, status: 1, last_login_at: Date.now(), update_at: Date.now(), wechat_bind: false, can_unbind_wechat: false, has_password: true, create_at: Date.now() - 86400000 * 30 }, mobile_user: { mobile: body.mobile, user_id: 1 }, wechat_user: null, app_users: [] } })
+  },
+  'GET:/admin/v1/user/info': () => resp({ user_info: { user: { user_id: 1, nick_name: '超级管理员', icon_url: '', sex: 1, status: 1, last_login_at: Date.now(), update_at: Date.now(), wechat_bind: false, can_unbind_wechat: false, has_password: true, create_at: Date.now() - 86400000 * 30 }, mobile_user: { mobile: '13800000000', user_id: 1 }, wechat_user: null, app_users: [] } }),
+  'GET:/admin/v1/perm/my_perms': () => resp({ perms: [{ id: 1, code: 'dashboard', name: '工作台' }, { id: 2, code: 'course', name: '课程管理' }, { id: 3, code: 'lesson', name: '课时管理' }, { id: 4, code: 'order', name: '订单管理' }, { id: 5, code: 'user', name: '用户管理' }], roles: [{ id: 1, name: '超级管理员' }] }),
+  'POST:/admin/v1/user/logout': () => resp(null),
+
+  // === 课程管理 ===
+  'GET:/admin/v1/course/list': (params) => {
+    let list = [...mockCourses]
+    if (params.name_kw) list = list.filter(c => c.name.toLowerCase().includes(params.name_kw.toLowerCase()))
+    if (params.status !== undefined && params.status !== null) list = list.filter(c => c.status === parseInt(params.status))
+    const page = parseInt(params.page) || 1; const limit = parseInt(params.limit) || 10
+    return resp({ page, limit, total: list.length, list: list.slice((page - 1) * limit, page * limit) })
+  },
+  'GET:/admin/v1/course/info': (params) => {
+    const c = mockCourses.find(c => c.id === parseInt(params.id))
+    return c ? resp({ ...c, total_duration: 7200, lesson_count: 48, catalogs: mockCatalogs }) : { code: 1, msg: '课程不存在', data: null }
+  },
+  'POST:/admin/v1/course/create': (body) => {
+    const nc = { id: Math.max(...mockCourses.map(c => c.id)) + 1, name: body.name, course_price: body.course_price || 0, service_time: body.service_time || 365, learn_time: body.learn_time || 30, sort: mockCourses.length + 1, status: body.status || 1, features: body.features || [], update_status: body.update_status || 1, cover_url: body.cover_url || '', detail_cover_url: body.detail_cover_url || '', detail: body.detail || '', create_at: Date.now(), update_at: Date.now(), create_name: '管理员', update_name: '管理员', has_purchased: false }
+    mockCourses.unshift(nc); return resp({ id: nc.id })
+  },
+  'POST:/admin/v1/course/update': (body) => {
+    const i = mockCourses.findIndex(c => c.id === body.id)
+    if (i === -1) return { code: 1, msg: '课程不存在', data: null }
+    mockCourses[i] = { ...mockCourses[i], ...body, update_at: Date.now() }; return resp(null)
+  },
+  'POST:/admin/v1/course/update_status': (body) => {
+    const c = mockCourses.find(c => c.id === body.id)
+    if (c) c.status = body.status; return resp(null)
+  },
+
+  // === 课时分类 ===
+  'GET:/admin/v1/lesson/category/list': () => resp({ list: mockAdminCategories, total: mockAdminCategories.length }),
+  'POST:/admin/v1/lesson/category/create': (body) => {
+    const nc = { id: Math.max(...mockAdminCategories.map(c => c.id)) + 1, name: body.name, parent_id: body.parent_id ?? -1, level: body.level ?? 1, sort: mockAdminCategories.length + 1, status: 1, create_at: Date.now(), update_at: Date.now() }
+    mockAdminCategories.push(nc); return resp({ id: nc.id })
+  },
+  'POST:/admin/v1/lesson/category/update': (body) => { const c = mockAdminCategories.find(c => c.id === body.id); if (c) Object.assign(c, body); return resp(null) },
+  'POST:/admin/v1/lesson/category/delete': (body) => { const ids = body.ids || []; mockAdminCategories = mockAdminCategories.filter(c => !ids.includes(c.id)); return resp(null) },
+  'POST:/admin/v1/lesson/category/update_sort': () => resp(null),
+
+  // === 课时 ===
+  'POST:/admin/v1/lesson/list': (params) => {
+    let list = [...mockAdminLessons]
+    if (params.category_id) list = list.filter(l => l.category_id === params.category_id)
+    if (params.name_kw) list = list.filter(l => l.name.includes(params.name_kw))
+    if (params.status !== undefined && params.status !== null) list = list.filter(l => l.status === params.status)
+    const page = parseInt(params.page) || 1; const limit = parseInt(params.limit) || 10
+    return resp({ page, limit, total: list.length, list: list.slice((page - 1) * limit, page * limit) })
+  },
+  'GET:/admin/v1/lesson/info': (params) => {
+    const l = mockAdminLessons.find(l => l.id === parseInt(params.lesson_id))
+    return l ? resp({ ...l, chapters: [], attachments: [] }) : { code: 1, msg: '课时不存在', data: null }
+  },
+  'POST:/admin/v1/lesson/create': (body) => {
+    const nl = { id: Math.max(...mockAdminLessons.map(l => l.id)) + 1, name: body.name, detail: body.detail || '', category_id: body.category_id || -1, category_name: mockAdminCategories.find(c => c.id === body.category_id)?.name || '未分类', duration: body.duration || 0, status: 1, create_at: Date.now(), update_at: Date.now() }
+    mockAdminLessons.unshift(nl); return resp({ id: nl.id })
+  },
+  'POST:/admin/v1/lesson/update': (body) => { const i = mockAdminLessons.findIndex(l => l.id === body.id); if (i !== -1) mockAdminLessons[i] = { ...mockAdminLessons[i], ...body, update_at: Date.now() }; return resp(null) },
+  'POST:/admin/v1/lesson/update_status': (body) => { const l = mockAdminLessons.find(l => l.id === body.id); if (l) l.status = body.status; return resp(null) },
+  'POST:/admin/v1/lesson/move': (body) => { const { ids, category_id } = body; const tc = mockAdminCategories.find(c => c.id === category_id); mockAdminLessons.forEach(l => { if ((ids || []).includes(l.id)) { l.category_id = category_id; l.category_name = tc?.name || '未分类' } }); return resp(null) },
+
+  // === 订单管理 ===
+  'GET:/admin/v1/order/list': (params) => {
+    let list = [...mockAdminOrders]
+    if (params.order_id) list = list.filter(o => String(o.id).includes(params.order_id))
+    if (params.status !== undefined && params.status !== null) list = list.filter(o => o.status === parseInt(params.status))
+    if (params.user_mobile) list = list.filter(o => o.user_mobile?.includes(params.user_mobile))
+    const page = parseInt(params.page) || 1; const limit = parseInt(params.limit) || 10
+    return resp({ page, limit, total: list.length, list: list.slice((page - 1) * limit, page * limit) })
+  },
+  'GET:/admin/v1/order/info': (params) => {
+    const o = mockAdminOrders.find(o => o.id === parseInt(params.order_id))
+    return o ? resp(o) : { code: 1, msg: '订单不存在', data: null }
+  },
+  'POST:/admin/v1/order/refund': (body) => {
+    const o = mockAdminOrders.find(o => o.id === body.order_id)
+    if (!o) return { code: 1, msg: '订单不存在', data: null }
+    if (o.status !== 2) return { code: 1, msg: '仅已支付订单可退款', data: null }
+    o.status = 3; return resp(null)
+  },
+
+  // === 用户管理 ===
+  'GET:/admin/v1/user/list': (params) => {
+    let list = [...mockAdminUsers]
+    if (params.nick_name_kw) list = list.filter(u => u.nick_name.toLowerCase().includes(params.nick_name_kw.toLowerCase()))
+    if (params.mobile) list = list.filter(u => u.mobile?.includes(params.mobile))
+    if (params.status !== undefined && params.status !== null) list = list.filter(u => u.status === parseInt(params.status))
+    const page = parseInt(params.page) || 1; const limit = parseInt(params.limit) || 10
+    return resp({ page, limit, total: list.length, list: list.slice((page - 1) * limit, page * limit) })
+  },
+  'GET:/admin/v1/user/info': (params) => {
+    const u = mockAdminUsers.find(u => u.user_id === parseInt(params.user_id))
+    return u ? resp(u) : { code: 1, msg: '用户不存在', data: null }
+  },
+  'POST:/admin/v1/user/update_status': (body) => {
+    const u = mockAdminUsers.find(u => u.user_id === body.user_id)
+    if (!u) return { code: 1, msg: '用户不存在', data: null }
+    u.status = body.status; return resp(null)
+  },
+
+  // === 系统设置 ===
+  'GET:/admin/v1/setting/list': () => resp({ list: mockAdminSettings }),
+  'POST:/admin/v1/setting/update': (body) => {
+    Object.entries(body).forEach(([k, v]) => { const s = mockAdminSettings.find(s => s.key === k); if (s) s.value = v })
+    return resp(null)
   },
 
   // === 微信回调（mock 忽略） ===

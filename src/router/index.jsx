@@ -22,6 +22,10 @@ import AdminCourseForm from '../admin/pages/CourseForm'
 import AdminCourseCatalog from '../admin/pages/CourseCatalog'
 import AdminLessonList from '../admin/pages/LessonList'
 import AdminLessonForm from '../admin/pages/LessonForm'
+import AdminOrderList from '../admin/pages/OrderList'
+import AdminUserList from '../admin/pages/UserList'
+import AdminSettings from '../admin/pages/Settings'
+import AdminProfile from '../admin/pages/Profile'
 
 const router = createBrowserRouter([
   // ========== C端路由 ==========
@@ -120,7 +124,15 @@ const router = createBrowserRouter([
   {
     path: '/admin/lessons/:id/edit',
     element: <AdminLessonForm />
-  }
+  },
+  // 订单管理
+  { path: '/admin/orders', element: <AdminOrderList /> },
+  // 用户管理
+  { path: '/admin/users', element: <AdminUserList /> },
+  // 系统设置
+  { path: '/admin/settings', element: <AdminSettings /> },
+  // 个人资料
+  { path: '/admin/profile', element: <AdminProfile /> }
 ])
 
 export default router
