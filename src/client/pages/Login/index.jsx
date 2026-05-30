@@ -4,7 +4,6 @@ import { message } from 'antd'
 import SliderCaptcha from '../../../shared/components/SliderCaptcha'
 import authStore from '../../stores/authStore'
 import { sendSmsCode, verifyCodeLogin, passwordLogin, resetPassword, appletLogin } from '../../api/auth'
-import { changePasswordSmsCode } from '../../api/user'
 import '../../../shared/styles/login.css'
 
 function Login() {
@@ -53,9 +52,6 @@ function Login() {
       return () => clearTimeout(timerRef.current)
     }
   }, [countdown])
-
-  // 清理
-  useEffect(() => () => clearTimeout(timerRef.current), [])
 
   // ===== 滑块验证码 =====
   const showCaptcha = (action) => {
@@ -130,7 +126,7 @@ function Login() {
   // ===== 重置密码 =====
   const doResetSms = async (ticket) => {
     try {
-      await changePasswordSmsCode(ticket)
+      await sendSmsCode('reset_password', mobile, ticket)
       message.success('验证码已发送')
       setCountdown(60)
     } catch (error) {
