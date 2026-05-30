@@ -666,9 +666,3 @@ export async function mockRequest(url, options = {}) {
   console.warn(`[Mock API] 未匹配的路由: ${key}`)
   return { code: 1, msg: `未实现的 mock: ${key}`, data: null }
 }
-
-// 检查是否启用 mock 模式
-export function isMockEnabled() {
-  return import.meta.env.VITE_USE_MOCK === 'true' ||
-         import.meta.env.DEV  // 开发环境默认启用
-}
